@@ -24,6 +24,7 @@ para rodar o código é necessário ter Node instalado, para instalar node siga 
 
 
 ## Developing
+(obs: tudo isso é feito na pasta frontend, ou seja, para antes de codgificar mude o diretório para frontend `cd ./frontend/`)
 Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
 
   
