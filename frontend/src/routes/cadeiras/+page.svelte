@@ -51,27 +51,54 @@
   </script>
 
 <h2>Adicionar Cadeira</h2>
-	<form on:submit|preventDefault={addCadeira}>
-		<input bind:value={nome} placeholder="Nome" required />
-	  	<input bind:value={necessidades_sala} placeholder="Necessidades de Sala" />
-	  	<input type="checkbox" bind:checked={obrigatoria} /> Obrigatória
-	  	<input type="checkbox" bind:checked={eletiva} /> Eletiva
-	  	<input type="checkbox" bind:checked={optativa} /> Optativa
-	  	<input bind:value={semestre} placeholder="Semestre" />
-	  	<input bind:value={curso} placeholder="Curso" />
-	  	<button type="submit">Adicionar</button>
-	</form>
-	<ul>
-		{#each cadeiras as cadeira}
-		<li>
-			<strong>{cadeira.nome}</strong>
-			<p>Necessidades de Sala: {cadeira.necessidades_sala}</p>
-			<p>Obrigatória: {cadeira.obrigatoria ? 'Sim' : 'Não'}</p>
-			<p>Eletiva: {cadeira.eletiva ? 'Sim' : 'Não'}</p>
-			<p>Optativa: {cadeira.optativa ? 'Sim' : 'Não'}</p>
-			<p>Semestre: {cadeira.semestre}</p>
-			<p>Curso: {cadeira.curso}</p>
-			<a href={`../editCadeira/${cadeira.id}`}>Editar</a>
-		</li>
-		{/each}
-	</ul>
+<form on:submit|preventDefault={addCadeira}>
+	<input bind:value={nome} placeholder="Nome" required />
+	<input bind:value={necessidades_sala} placeholder="Necessidades de Sala" />
+  	<input type="checkbox" bind:checked={obrigatoria} /> Obrigatória
+  	<input type="checkbox" bind:checked={eletiva} /> Eletiva
+  	<input type="checkbox" bind:checked={optativa} /> Optativa
+	<input bind:value={semestre} placeholder="Semestre" />
+	<input bind:value={curso} placeholder="Curso" />
+	<button type="submit">Adicionar</button>
+</form>
+<table>
+	<tr>
+		<th>Nome:</th>
+		<th>Necessidades de Sala: </th>
+		<th>Obrigatória: </th>
+		<th>Eletiva:</th>
+		<th>Optativa:</th>
+		<th>Semestre:</th>
+		<th>Curso:</th>
+		<th>Edição</th>
+	</tr>
+	{#each cadeiras as cadeira}
+	<tr>
+		<td>{cadeira.nome}</td>
+		<td>{cadeira.necessidades_sala}</td>
+		<td>{cadeira.obrigatoria ? 'Sim' : 'Não'}</td>
+		<td>{cadeira.eletiva ? 'Sim' : 'Não'}</td>
+		<td>{cadeira.optativa ? 'Sim' : 'Não'}</td>
+		<td>{cadeira.semestre}</td>
+		<td>{cadeira.curso}</td>
+		<td><a href={`../editCadeira/${cadeira.id}`}>Editar</a></td>
+	</tr>
+	{/each}
+</table>
+<style>
+	table {
+	font-family: arial, sans-serif;
+  	border-collapse: collapse;
+  	width: 100%;
+	}
+	
+	td, th {
+  	border: 1px solid #e0e0e0;
+  	text-align: left;
+  	padding: 8px;
+	}
+
+	tr:nth-child(even) {
+  	background-color: #e0e0e0;
+	}
+</style>

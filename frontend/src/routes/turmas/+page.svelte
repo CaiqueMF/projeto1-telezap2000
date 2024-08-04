@@ -1,45 +1,69 @@
 <script>
-    import { onMount } from 'svelte';
-    import axios from 'axios';
-    let turmas = [];
-    let selectedTurma = null;
+  import { onMount } from 'svelte';
+  import axios from 'axios';
   
-    onMount(async () => {
+  let id_cadeira = '';
+  let id_professor = '';
+  let id_sala = '';
+  let n_turma = '';
+  let n_vagas = '';
+  let curso = '';
+  let turmas = [];
+
+  onMount(async () => {
+    await fetchTurma();
+});
+
+  async function fetchTurma() {
       try {
-        const response = await axios.get('http://localhost:5000/api/turmas');
-        turmas = response.data;
+          const response = await axios.get('http://localhost:5000/api/turmas');
+          turmas = response.data;
       } catch (error) {
-        console.error('Erro ao buscar turmas:', error);
+          console.error(error);
       }
-    });
-  
-    async function fetchTurma(id) {
+  }
+
+  async function addTurma() {
       try {
-        const response = await axios.get(`http://localhost:5000/api/turmas/${id}`);
-        selectedTurma = response.data;
+          const newTurma = {
+              id_cadeira,
+              id_professor,
+              id_sala,
+              n_turma,
+              n_vagas,
+              curso
+          };
+          await axios.post('http://localhost:5000/api/turmas', newTurma)
+          await fetchTurma();
+          id_cadeira = ''
+          id_professor = ''
+          id_sala = ''
+          n_turma = '';
+          n_vagas = '';
+          curso = '';
       } catch (error) {
-        console.error('Erro ao buscar turma:', error);
+          console.error('Erro ao adicionar turma:', error);
       }
-    }
-  </script>
-  
-  <h1>Turmas</h1>
-  <ul>
-    {#each turmas as turma (turma.id)}
-      <li>
-        Turma {turma.n_turma}
-      </li>
-    {/each}
-  </ul>
-  
-  {#if selectedTurma}
-    <h2>Detalhes da Turma</h2>
-    <p><strong>ID:</strong> {selectedTurma.id}</p>
-    <p><strong>ID Cadeira:</strong> {selectedTurma.id_cadeira}</p>
-    <p><strong>ID Professor:</strong> {selectedTurma.id_professor}</p>
-    <p><strong>ID Sala:</strong> {selectedTurma.id_sala}</p>
-    <p><strong>Número da Turma:</strong> {selectedTurma.n_turma}</p>
-    <p><strong>Número de Vagas:</strong> {selectedTurma.n_vagas}</p>
-    <p><strong>Curso:</strong> {selectedTurma.curso}</p>
-  {/if}
-  
+  }
+</script>
+
+<h1>Turmas</h1>
+
+<form on:submit|preventDefault={addTurma}>
+  <input bind:value={id_cadeira} placeholder="ID da Cadeira" required />
+  <input bind:value={id_professor} placeholder="ID do Professor" required />
+  <input bind:value={id_sala} placeholder="ID da Sala" required />
+  <input bind:value={n_turma} placeholder="Numero da Turma" required />
+  <input bind:value={n_vagas} placeholder="Vagas" required />
+  <input bind:value={curso} placeholder="Curso" required />
+  <button type="submit">Adicionar</button>
+</form>
+
+<ul>
+  {#each turmas as turma (turma.id)}
+    <li>
+        {turma.n_turma} - {turma.n_vagas} - {turma.curso}
+    </li>
+    <a href={`../editTurma/${turma.id}`}>Editar</a>
+  {/each}
+</ul>
