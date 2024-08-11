@@ -1,0 +1,51 @@
+<script>
+    import { onMount } from 'svelte';
+    import axios from 'axios';
+    let nome = ''
+    let tipos = ''
+    let salas = [];
+  
+    onMount(async () => {
+	    await fetchSala();
+	});
+
+    async function fetchSala() {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/salas`);
+        salas = response.data;
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    async function addSala() {
+	  try {
+		  const newSala = {
+		    nome,
+        tipos
+		  };
+		await axios.post('http://localhost:5000/api/salas', newSala);
+		await fetchSala();
+		nome = '';
+    tipos = ''
+	  } catch (error) {
+		console.error(error);
+	  }
+	}
+  </script>
+  
+  <h1>Salas</h1>
+
+  <form on:submit|preventDefault={addSala}>
+    <input bind:value={nome} placeholder="Nome" required />
+    <input bind:value={tipos} placeholder="Tipo de sala" required />
+    <button type="submit">Adicionar</button>
+  </form>
+  <ul>
+    {#each salas as sala (sala.id)}
+      <li>
+          {sala.nome} - {sala.tipos}
+      </li>
+      <a href={`../editSala/${sala.id}`}>Editar</a>
+    {/each}
+  </ul>  
