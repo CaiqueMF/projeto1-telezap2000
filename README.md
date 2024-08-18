@@ -3,6 +3,8 @@
 
 Projeto da equipe Telezap2000 para cadeira projeto 1
 
+  
+
 O projeto tem como objetivo melhorar o processo de alocação de salas do Instituto UFC virtual
 
   
@@ -24,8 +26,9 @@ Milena Costa Barrozo
 ## instalação
 para rodar o código é necessário ter Node instalado, para instalar node siga as orientações em: https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
 
-guite râbi
+
 ## Developing
+(obs: tudo isso é feito na pasta frontend, ou seja, para antes de codgificar mude o diretório para frontend `cd ./frontend/`)
 Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
 
   
