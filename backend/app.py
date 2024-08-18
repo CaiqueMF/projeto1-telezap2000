@@ -1,7 +1,9 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS  # Importe o Flask-CORS
 
 app = Flask(__name__)
+CORS(app)  # Habilite CORS para todas as rotas
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///university.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -35,7 +37,7 @@ class Cadeira(db.Model):
 
 class Sala(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    nome_sala = db.Column(db.String(100), nullable=False)
+    nome = db.Column(db.String(100), nullable=False)
     tipos = db.Column(db.String(100))
 
 class Professor(db.Model):
@@ -65,7 +67,6 @@ class Alocacao(db.Model):
 def create_tables():
     db.create_all()
 
-# Routes for Cadeira
 @app.route('/api/cadeiras', methods=['POST'])
 def add_cadeira():
     data = request.get_json()
@@ -96,12 +97,51 @@ def get_cadeiras():
         'curso': cadeira.curso
     } for cadeira in cadeiras])
 
+@app.route('/api/cadeiras/<int:id>', methods=['GET', 'PUT', 'DELETE'])
+def handle_cadeira(id):
+    if request.method == 'GET':
+        cadeira = Cadeira.query.get(id)
+        if cadeira is None:
+            return jsonify({'message': 'Cadeira não encontrada'}), 404
+        return jsonify({
+            'id': cadeira.id,
+            'nome': cadeira.nome,
+            'necessidades_sala': cadeira.necessidades_sala,
+            'obrigatoria': cadeira.obrigatoria,
+            'eletiva': cadeira.eletiva,
+            'optativa': cadeira.optativa,
+            'semestre': cadeira.semestre,
+            'curso': cadeira.curso
+        })
+    elif request.method == 'PUT':
+        data = request.get_json()
+        cadeira = Cadeira.query.get(id)
+        if cadeira is None:
+            return jsonify({'message': 'Cadeira não encontrada'}), 404
+        cadeira.nome = data.get('nome', cadeira.nome)
+        cadeira.necessidades_sala = data.get('necessidades_sala', cadeira.necessidades_sala)
+        cadeira.obrigatoria = data.get('obrigatoria', cadeira.obrigatoria)
+        cadeira.eletiva = data.get('eletiva', cadeira.eletiva)
+        cadeira.optativa = data.get('optativa', cadeira.optativa)
+        cadeira.semestre = data.get('semestre', cadeira.semestre)
+        cadeira.curso = data.get('curso', cadeira.curso)
+        db.session.commit()
+        return jsonify({'message': 'Cadeira atualizada com sucesso!'})
+    elif request.method == 'DELETE':
+        cadeira = Cadeira.query.get(id)
+        if cadeira is None:
+            return jsonify({'message': 'Cadeira não encontrada'}), 404
+        db.session.delete(cadeira)
+        db.session.commit()
+        return jsonify({'message': 'Cadeira deletada com sucesso!'})
+
+
 # Routes for Sala
 @app.route('/api/salas', methods=['POST'])
 def add_sala():
     data = request.get_json()
     nova_sala = Sala(
-        nome_sala=data['nome_sala'],
+        nome=data['nome'],
         tipos=data.get('tipos')
     )
     db.session.add(nova_sala)
@@ -113,9 +153,37 @@ def get_salas():
     salas = Sala.query.all()
     return jsonify([{
         'id': sala.id,
-        'nome_sala': sala.nome_sala,
+        'nome': sala.nome,
         'tipos': sala.tipos
     } for sala in salas])
+
+@app.route('/api/salas/<int:id>', methods=['GET', 'PUT', 'DELETE'])
+def handle_sala(id):
+    if request.method == 'GET':
+        sala = Sala.query.get(id)
+        if sala is None:
+            return jsonify({'message': 'Sala não encontrada'}), 404
+        return jsonify({
+            'id': sala.id,
+            'nome': sala.nome,
+            'tipos': sala.tipos
+        })
+    elif request.method == 'PUT':
+        data = request.get_json()
+        sala = Sala.query.get(id)
+        if sala is None:
+            return jsonify({'message': 'Sala não encontrada'}), 404
+        sala.nome = data.get('nome', sala.nome)
+        sala.tipos = data.get('tipos', sala.tipos)
+        db.session.commit()
+        return jsonify({'message': 'Sala atualizada com sucesso!'})
+    elif request.method == 'DELETE':
+        sala = Sala.query.get(id)
+        if sala is None:
+            return jsonify({'message': 'Sala não encontrada'}), 404
+        db.session.delete(sala)
+        db.session.commit()
+        return jsonify({'message': 'Sala deletada com sucesso!'})
 
 # Routes for Professor
 @app.route('/api/professores', methods=['POST'])
@@ -135,6 +203,32 @@ def get_professores():
         'id': professor.id,
         'nome': professor.nome
     } for professor in professores])
+
+@app.route('/api/professores/<int:id>', methods=['GET', 'PUT', 'DELETE'])
+def handle_professor(id):
+    if request.method == 'GET':
+        professor = Professor.query.get(id)
+        if professor is None:
+            return jsonify({'message': 'Professor não encontrado'}), 404
+        return jsonify({
+            'id': professor.id,
+            'nome': professor.nome
+        })
+    elif request.method == 'PUT':
+        data = request.get_json()
+        professor = Professor.query.get(id)
+        if professor is None:
+            return jsonify({'message': 'Professor não encontrado'}), 404
+        professor.nome = data.get('nome', professor.nome)
+        db.session.commit()
+        return jsonify({'message': 'Professor atualizado com sucesso!'})
+    elif request.method == 'DELETE':
+        professor = Professor.query.get(id)
+        if professor is None:
+            return jsonify({'message': 'Professor não encontrado'}), 404
+        db.session.delete(professor)
+        db.session.commit()
+        return jsonify({'message': 'Professor deletado com sucesso!'})
 
 # Routes for Turma
 @app.route('/api/turmas', methods=['POST'])
@@ -165,6 +259,42 @@ def get_turmas():
         'curso': turma.curso
     } for turma in turmas])
 
+@app.route('/api/turmas/<int:id>', methods=['GET', 'PUT', 'DELETE'])
+def handle_turma(id):
+    if request.method == 'GET':
+        turma = Turma.query.get(id)
+        if turma is None:
+            return jsonify({'message': 'Turma não encontrada'}), 404
+        return jsonify({
+            'id': turma.id,
+            'id_cadeira': turma.id_cadeira,
+            'id_professor': turma.id_professor,
+            'id_sala': turma.id_sala,
+            'n_turma': turma.n_turma,
+            'n_vagas': turma.n_vagas,
+            'curso': turma.curso
+        })
+    elif request.method == 'PUT':
+        data = request.get_json()
+        turma = Turma.query.get(id)
+        if turma is None:
+            return jsonify({'message': 'Turma não encontrada'}), 404
+        turma.id_cadeira = data.get('id_cadeira', turma.id_cadeira)
+        turma.id_professor = data.get('id_professor', turma.id_professor)
+        turma.id_sala = data.get('id_sala', turma.id_sala)
+        turma.n_turma = data.get('n_turma', turma.n_turma)
+        turma.n_vagas = data.get('n_vagas', turma.n_vagas)
+        turma.curso = data.get('curso', turma.curso)
+        db.session.commit()
+        return jsonify({'message': 'Turma atualizada com sucesso!'})
+    elif request.method == 'DELETE':
+        turma = Turma.query.get(id)
+        if turma is None:
+            return jsonify({'message': 'Turma não encontrada'}), 404
+        db.session.delete(turma)
+        db.session.commit()
+        return jsonify({'message': 'Turma deletada com sucesso!'})
+
 # Routes for Alocacao
 @app.route('/api/alocacoes', methods=['POST'])
 def add_alocacao():
@@ -176,7 +306,7 @@ def add_alocacao():
     )
     db.session.add(nova_alocacao)
     db.session.commit()
-    return jsonify({'message': 'Alocacao adicionada com sucesso!'}), 201
+    return jsonify({'message': 'Alocação adicionada com sucesso!'}), 201
 
 @app.route('/api/alocacoes', methods=['GET'])
 def get_alocacoes():
@@ -187,6 +317,16 @@ def get_alocacoes():
         'dia': alocacao.dia,
         'horario': alocacao.horario
     } for alocacao in alocacoes])
+
+@app.route('/api/alocacoes/<int:id>', methods=['PUT'])
+def update_alocacao(id):
+    data = request.get_json()
+    alocacao = Alocacao.query.get_or_404(id)
+    alocacao.id_turma = data.get('id_turma', alocacao.id_turma)
+    alocacao.dia = data.get('dia', alocacao.dia)
+    alocacao.horario = data.get('horario', alocacao.horario)
+    db.session.commit()
+    return jsonify({'message': 'Alocação atualizada com sucesso!'}), 200
 
 if __name__ == '__main__':
     app.run(debug=True)

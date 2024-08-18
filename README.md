@@ -12,9 +12,13 @@ O projeto tem como objetivo melhorar o processo de alocação de salas do Instit
 Integrantes:
 
 Iuri Castro SIlva
+
 José Caique Militão França
+
 José Flávio Alves Gomes Filho
+
 José Ivan Sena Torres Portugal
+
 Milena Costa Barrozo
 
 [link](https://amazing-marzipan-d82560.netlify.app/)
