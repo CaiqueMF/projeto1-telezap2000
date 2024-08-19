@@ -11,21 +11,27 @@ export const nodes = [
 	() => import('./nodes/7'),
 	() => import('./nodes/8'),
 	() => import('./nodes/9'),
-	() => import('./nodes/10')
+	() => import('./nodes/10'),
+	() => import('./nodes/11'),
+	() => import('./nodes/12'),
+	() => import('./nodes/13')
 ];
 
 export const server_loads = [];
 
 export const dictionary = {
 		"/": [2],
-		"/cadeiras": [3],
-		"/editCadeira/[id]": [4],
-		"/editProfessor/[id]": [5],
-		"/editSala/[id]": [6],
-		"/editTurma/[id]": [7],
-		"/professores": [8],
-		"/salas": [9],
-		"/turmas": [10]
+		"/about": [3],
+		"/cadeiras": [4],
+		"/editCadeira/[id]": [5],
+		"/editProfessor/[id]": [6],
+		"/editSala/[id]": [7],
+		"/editTurma/[id]": [8],
+		"/professores": [9],
+		"/salas": [10],
+		"/sverdle": [~11],
+		"/sverdle/how-to-play": [12],
+		"/turmas": [13]
 	};
 
 export const hooks = {

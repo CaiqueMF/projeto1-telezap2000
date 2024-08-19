@@ -11,7 +11,8 @@
 	let semestre = '';
 	let curso = '';
 
-	let pesquisa = ''
+	let pesquisaNome = ''
+	let pesquisaSemestre = ''
   
 	onMount(async () => {
 	  await fetchCadeiras();
@@ -51,7 +52,8 @@
 	  }
 	}
   </script>
-<input type="text" bind:value={pesquisa} placeholder="Buscar disciplina">
+<input type="text" bind:value={pesquisaNome} placeholder="Buscar disciplina">
+<input type="text" bind:value={pesquisaSemestre} placeholder="Buscar semestre">
 <h2>Adicionar Disciplina</h2>
 <form on:submit|preventDefault={addCadeira}>
 	<input bind:value={nome} placeholder="Nome" required />
@@ -74,35 +76,22 @@
 		<th>Curso:</th>
 		<th>Edição</th>
 	</tr>
-	{#if pesquisa == ""}
 	{#each cadeiras as cadeira}
-	<tr>
-		<td>{cadeira.nome}</td>
-		<td>{cadeira.necessidades_sala}</td>
-		<td>{cadeira.obrigatoria ? 'Sim' : 'Não'}</td>
-		<td>{cadeira.eletiva ? 'Sim' : 'Não'}</td>
-		<td>{cadeira.optativa ? 'Sim' : 'Não'}</td>
-		<td>{cadeira.semestre}</td>
-		<td>{cadeira.curso}</td>
-		<td><a href={`../editCadeira/${cadeira.id}`}>Editar</a></td>
-	</tr>
-	{/each}
-	{:else}
-	{#each cadeiras as cadeira}
-		{#if cadeira.nome.toLowerCase().includes(pesquisa.toLowerCase())}
-		<tr>
-			<td>{cadeira.nome}</td>
-			<td>{cadeira.necessidades_sala}</td>
-			<td>{cadeira.obrigatoria ? 'Sim' : 'Não'}</td>
-			<td>{cadeira.eletiva ? 'Sim' : 'Não'}</td>
-			<td>{cadeira.optativa ? 'Sim' : 'Não'}</td>
-			<td>{cadeira.semestre}</td>
-			<td>{cadeira.curso}</td>
-			<td><a href={`../editCadeira/${cadeira.id}`}>Editar</a></td>
-		</tr>
+		{#if cadeira.nome.toLowerCase().includes(pesquisaNome.toLowerCase()) || pesquisaNome == "" }
+			{#if cadeira.semestre.toString() == pesquisaSemestre || pesquisaSemestre == "" }
+				<tr>
+					<td>{cadeira.nome}</td>
+					<td>{cadeira.necessidades_sala}</td>
+					<td>{cadeira.obrigatoria ? 'Sim' : 'Não'}</td>
+					<td>{cadeira.eletiva ? 'Sim' : 'Não'}</td>
+					<td>{cadeira.optativa ? 'Sim' : 'Não'}</td>
+					<td>{cadeira.semestre}</td>
+					<td>{cadeira.curso}</td>
+					<td><a href={`../editCadeira/${cadeira.id}`}>Editar</a></td>
+				</tr>
+			{/if}
 		{/if}
 	{/each}
-	{/if}
 </table>
 <style>
 	table {

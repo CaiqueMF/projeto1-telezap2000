@@ -1,11 +1,14 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS  # Importe o Flask-CORS
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 
 app = Flask(__name__)
 CORS(app)  # Habilite CORS para todas as rotas
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///university.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['JWT_SECRET_KEY'] = 'senha_mudar_depois'
+jwt = JWTManager(app)
 
 db = SQLAlchemy(app)
 
@@ -327,6 +330,31 @@ def update_alocacao(id):
     alocacao.horario = data.get('horario', alocacao.horario)
     db.session.commit()
     return jsonify({'message': 'Alocação atualizada com sucesso!'}), 200
+
+#teste de login
+users = {
+    "coordenador": {"password": "123", "role": "admin"},
+    "professor": {"password": "123", "role": "user"}
+}
+
+
+@app.route('/api/login', methods=['POST'])
+def login():
+    username = request.json.get('username')
+    password = request.json.get('password')
+
+    user = users.get(username)
+    if not user or user['password'] != password:
+        return jsonify({"msg": "Bad username or password"}), 401
+
+    access_token = create_access_token(identity={"username": username, "role": user['role']})
+    return jsonify(access_token=access_token, role = user['role'])
+
+@app.route('/api/protected', methods=['GET'])
+@jwt_required()
+def protected():
+    current_user = get_jwt_identity()
+    return jsonify(logged_in_as=current_user), 200
 
 if __name__ == '__main__':
     app.run(debug=True)

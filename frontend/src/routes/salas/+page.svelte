@@ -4,7 +4,7 @@
     let nome = ''
     let tipos = ''
     let salas = [];
-  
+    let pesquisaNome = ""
     onMount(async () => {
 	    await fetchSala();
 	});
@@ -35,7 +35,7 @@
   </script>
   
   <h1>Salas</h1>
-
+  <input type="text" bind:value={pesquisaNome} placeholder="Buscar sala">
   <form on:submit|preventDefault={addSala}>
     <input bind:value={nome} placeholder="Nome" required />
     <input bind:value={tipos} placeholder="Tipo de sala" required />
@@ -43,9 +43,11 @@
   </form>
   <ul>
     {#each salas as sala (sala.id)}
-      <li>
-          {sala.nome} - {sala.tipos}
-      </li>
-      <a href={`../editSala/${sala.id}`}>Editar</a>
+      {#if sala.nome.toLowerCase().includes(pesquisaNome.toLowerCase()) || pesquisaNome == "" }
+          <li>
+            {sala.nome} - {sala.tipos}
+        </li>
+        <a href={`../editSala/${sala.id}`}>Editar</a>
+      {/if} 
     {/each}
   </ul>  

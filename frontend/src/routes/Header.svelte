@@ -5,6 +5,9 @@
 <header>
 	<nav>
 		<ul>
+			<li aria-current={$page.url.pathname === '/' ? 'page' : undefined}>
+				<a href="/">Home</a>
+			</li>
 			<li aria-current={$page.url.pathname === '/cadeiras' ? 'page' : undefined}>
 				<a href="/cadeiras">Cadeiras</a>
 			</li>
