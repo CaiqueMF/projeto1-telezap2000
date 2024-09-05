@@ -11,12 +11,33 @@
     let n_turma = '';
     let n_vagas = '';
     let curso = '';
+
+    let cadeiras = [];
+    let professores = [];
+    let salas = [];
   
     $: id = $page.params.id;
   
     onMount(async () => {
       await fetchTurma();
+      await fetchOptions();
     });
+
+    async function fetchOptions() {
+    try {
+      const [cadeiraRes, professorRes, salaRes] = await Promise.all([
+        axios.get('http://localhost:5000/api/cadeiras'),
+        axios.get('http://localhost:5000/api/professores'),
+        axios.get('http://localhost:5000/api/salas')
+      ]);
+      
+      cadeiras = cadeiraRes.data;
+      professores = professorRes.data;
+      salas = salaRes.data;
+    } catch (error) {
+      console.error('Erro ao carregar opções:', error);
+    }
+  }
   
     async function fetchTurma() {
       try {
@@ -49,14 +70,40 @@
         console.error(error);
       }
     }
+
+    async function deleteTurma(params) {
+      try {
+        await axios.delete(`http://localhost:5000/api/turmas/${id}`)
+        goto('/turmas');
+      } catch (error) {
+        console.error(error);
+      }
+    }
   </script>
   
   <main>
     <h1>Editar Turma</h1>
     <form on:submit|preventDefault={updateTurma}>
-        <input bind:value={id_cadeira} placeholder="ID da Cadeira" required />
-        <input bind:value={id_professor} placeholder="ID do Professor" required />
-        <input bind:value={id_sala} placeholder="ID da Sala" required />
+      <select bind:value={id_cadeira} required>
+        <option value="" disabled selected>Selecione a Cadeira</option>
+        {#each cadeiras as cadeira}
+          <option value={cadeira.id}>{cadeira.nome}</option>
+        {/each}
+      </select>
+    
+      <select bind:value={id_professor} required>
+        <option value="" disabled selected>Selecione o Professor</option>
+        {#each professores as professor}
+          <option value={professor.id}>{professor.nome}</option>
+        {/each}
+      </select>
+    
+      <select bind:value={id_sala} required>
+        <option value="" disabled selected>Selecione a Sala</option>
+        {#each salas as sala}
+          <option value={sala.id}>{sala.nome}</option>
+        {/each}
+      </select>
         <input bind:value={n_turma} placeholder="Numero da Turma" required />
         <input bind:value={n_vagas} placeholder="Vagas" required />
         <select bind:value={curso} required>
@@ -67,5 +114,6 @@
         </select>
         <button type="submit">Atualizar</button>
     </form>
+    <button on:click={deleteTurma}>Deletar</button>
   </main>
   

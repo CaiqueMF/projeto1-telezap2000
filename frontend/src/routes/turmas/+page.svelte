@@ -83,7 +83,8 @@
 <h1>Turmas</h1>
 
 <form on:submit|preventDefault={addTurma}>
-  <select bind:value={id_cadeira} required>
+  <select bind:value={id_cadeira} on:change={() => {
+    curso = cadeiras[id_cadeira - 1].curso}} required>
     <option value="" disabled selected>Selecione a Cadeira</option>
     {#each cadeiras as cadeira}
       <option value={cadeira.id}>{cadeira.nome}</option>

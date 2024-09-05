@@ -30,7 +30,7 @@
             goto('/cadeiras')
         }
       } else {
-        error = 'Invalid username or password';
+        error = 'Houve um erro durante o login';
       }
     }
     onMount(() => {
@@ -48,7 +48,7 @@
   <main>
     <form on:submit|preventDefault={handleLogin}>
         <div class="return">
-            <i class="fa-solid fa-x"></i>
+            <p>X</p>
         </div>
         {#if error}
             <p style="color: red;">{error}</p>
@@ -74,13 +74,13 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        height: 100vh;
+        height: 90vh;
         text-align: center;
     }
   
     form {
         width: 40%;
-        height: 60%;
+        height: 70%;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -98,13 +98,14 @@
         width: 100%;
         font-size: 1.5rem;
         padding: 0.5rem 1rem;
+        color: black;
         background-color: #5A7302;
         border-top-right-radius: 10px;
         border-top-left-radius: 10px;
     }
   
-    .return i {
-        padding: 0.5rem;
+    .return p {
+        color: black;
         cursor: pointer;
     }
   
