@@ -1,10 +1,3 @@
-<script>
-  import { goto } from '$app/navigation';
-  import { onMount } from 'svelte';
-  import { token, user } from '../store';
-
-</script>
-
 <main>
   <h1>Organize seus <span>Horários</span></h1>
   <h3>Conte com a ajuda da <span>Fada</span> para buscar e organizar suas disciplinas</h3>
@@ -21,10 +14,12 @@
     }
     h1 {
         font-family: 'Times New Roman', Times, serif;
-        font-size: 100px;
+        font-size: 90px;
+        font-weight: 400;
         padding-top: 10%;
     }
     h3 {
+        font-family: 'Marvel', sans-serif;
         padding: 10% 0;
     }
     span {

@@ -26,8 +26,8 @@
         });
         if (data.role == 'admin'){
             goto('/turmas');
-        }else {
-            goto('/cadeiras')
+        } else {
+            goto('/professor')
         }
       } else {
         error = 'Houve um erro durante o login';
@@ -39,7 +39,7 @@
             if (currentUser.role === 'admin') {
                 goto('/turmas');
             } else {
-                goto('/cadeiras');
+                goto('/professor');
             }
         }
     }); 
@@ -60,10 +60,6 @@
             <label for="password">Senha:</label>
             <input type="password" id="password" bind:value={password} required />
             <button type="submit">Entrar</button>
-        </div>
-  
-        <div class="createAccount">
-            <p>Novo por aqui? <a href="/register">Crie uma conta</a></p>
         </div>
     </form>
   </main>
@@ -100,8 +96,7 @@
         padding: 0.5rem 1rem;
         color: black;
         background-color: #5A7302;
-        border-top-right-radius: 10px;
-        border-top-left-radius: 10px;
+        border-radius: 10px;
     }
   
     .return p {
@@ -115,6 +110,7 @@
         font-size: 1rem;
         border: 1px black solid;
         border-radius: 10px;
+        padding-left: 3%;
     }
   
     button {
@@ -137,6 +133,8 @@
         justify-content: center;
         gap: 10px;
         background-color: #D9D9D9;
+        border-bottom-left-radius: 10px;
+        border-bottom-right-radius: 10px;
     }
   
     h1 {
@@ -147,17 +145,6 @@
     label {
         display: flex;
         margin: 0 2rem;
-    }
-  
-    .createAccount {
-        flex-grow: 2;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    a {
-        color: white;
     }
   </style>
   

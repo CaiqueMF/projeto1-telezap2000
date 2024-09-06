@@ -3,8 +3,6 @@
 	import { token, user } from '../store';
 
 	$: currentUser = $user.role;
-
-	console.log(currentUser);
 </script>
 
 <header>
@@ -23,7 +21,7 @@
 			</li>
 			{#if currentUser == "admin"}
 			<li aria-current={$page.url.pathname === '/cadeiras' ? 'page' : undefined}>
-				<a href="/cadeiras">Cadeiras</a>
+				<a href="/cadeiras">Disciplinas</a>
 			</li>
 			<li aria-current={$page.url.pathname === '/professores' ? 'page' : undefined}>
 				<a href="/professores">Professores</a>
@@ -35,9 +33,11 @@
 				<a href="/turmas">Turmas</a>
 			</li>
 			{/if}
+			{#if currentUser == null}
 			<li aria-current={$page.url.pathname === '/login' ? 'page' : undefined}>
 				<a href="/login">Login</a>
 			</li>
+			{/if}
 		</ul>
 	</nav>
 </header>
