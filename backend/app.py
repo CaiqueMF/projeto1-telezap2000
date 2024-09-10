@@ -67,9 +67,34 @@ class Alocacao(db.Model):
     horario = db.Column(db.String(50), nullable=False)
     turma = db.relationship('Turma', backref='alocacoes')
 
+class Feedback(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    id_professor = db.Column(db.Integer, db.ForeignKey('professor.id'), nullable=False)
+    feedback = db.Column(db.String(1000), nullable=False)
+
 @app.before_request
 def create_tables():
     db.create_all()
+
+@app.route('/api/feedbacks', methods=['POST'])
+def add_feedback():
+    data = request.get_json()
+    novo_feedback = Feedback(
+    id_professor=data['id_professor'],
+    feedback=data['feedback'],  # Corrigido para usar colchetes
+)
+    db.session.add(novo_feedback)
+    db.session.commit()
+    return jsonify({'message': 'Feedback adicionada com sucesso!'}), 201
+
+@app.route('/api/feedbacks', methods=['GET'])
+def get_feedbacks():
+    feedbacks = Feedback.query.all()
+    return jsonify([{
+        'id': feedback.id,
+        'id_professor': feedback.id_professor,
+        'feedback': feedback.feedback
+    } for feedback in feedbacks])
 
 @app.route('/api/cadeiras', methods=['POST'])
 def add_cadeira():
@@ -331,7 +356,8 @@ def update_alocacao(id):
 #teste de login
 users = {
     "coordenador": {"password": "123", "role": "admin"},
-    "professor": {"password": "123", "role": "user"}
+    "professor": {"password": "123", "role": "user"},
+    "Liandro": {"password": "123", "role": "user"}
 }
 
 

@@ -16,9 +16,6 @@
 				<a href="/professor">Professor</a>
 			</li>
 			{/if}
-			<li aria-current={$page.url.pathname === '/agora' ? 'page' : undefined}>
-				<a href="/agora">Agora</a>
-			</li>
 			{#if currentUser == "admin"}
 			<li aria-current={$page.url.pathname === '/cadeiras' ? 'page' : undefined}>
 				<a href="/cadeiras">Disciplinas</a>

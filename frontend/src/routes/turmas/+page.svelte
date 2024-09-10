@@ -85,7 +85,7 @@
 <form on:submit|preventDefault={addTurma}>
   <select bind:value={id_cadeira} on:change={() => {
     curso = cadeiras[id_cadeira - 1].curso}} required>
-    <option value="" disabled selected>Selecione a Cadeira</option>
+    <option value="" disabled selected>Selecione a Disciplina</option>
     {#each cadeiras as cadeira}
       <option value={cadeira.id}>{cadeira.nome}</option>
     {/each}
@@ -116,22 +116,43 @@
   <button type="submit">Adicionar</button>
 </form>
 
-<ul>
+<table>
+  <tr>
+    <th>Disciplina:</th>
+    <th>Professor:</th>
+    <th>Sala:</th>
+    <th>Turma:</th>
+    <th>Vagas:</th>
+    <th>Curso:</th>
+    <th>Edição</th>
+  </tr>
   {#each turmas as turma (turma.id)}
-    <li>
-        <br>
-        <strong>Cadeira:</strong> {turma.nome_cadeira}
-        <br>
-        <strong>Professor:</strong> {turma.nome_professor}
-        <br>
-        <strong>Sala:</strong> {turma.nome_sala}
-        <br>
-        <strong>Turma: </strong>{turma.n_turma}
-        <br>
-        <strong>Vagas: </strong>{turma.n_vagas}
-        <br>
-        <strong>Curso </strong>{turma.curso}
-    </li>
-    <a href={`../editTurma/${turma.id}`}>Editar</a>
+    <tr>
+        <td>{turma.nome_cadeira}</td>
+        <td>{turma.nome_professor}</td>
+        <td>{turma.nome_sala}</td>
+        <td>{turma.n_turma}</td>
+        <td>{turma.n_vagas}</td>
+        <td>{turma.curso}</td>
+        <td><a href={`../editTurma/${turma.id}`}>Editar</a></td>
+    </tr>
   {/each}
-</ul>
+</table>
+
+<style>
+  table {
+	  font-family: arial, sans-serif;
+	  border-collapse: collapse;
+	  width: 100%;
+	}
+	
+	td, th {
+	  border: 1px solid #e0e0e0;
+	  text-align: left;
+	  padding: 8px;
+	}
+  
+	tr:nth-child(even) {
+	  background-color: #e0e0e0;
+	}
+</style>

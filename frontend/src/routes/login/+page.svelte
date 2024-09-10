@@ -47,9 +47,6 @@
   
   <main>
     <form on:submit|preventDefault={handleLogin}>
-        <div class="return">
-            <p>X</p>
-        </div>
         {#if error}
             <p style="color: red;">{error}</p>
         {/if}
@@ -87,23 +84,6 @@
         position: relative;
     }
   
-    .return {
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        width: 100%;
-        font-size: 1.5rem;
-        padding: 0.5rem 1rem;
-        color: black;
-        background-color: #5A7302;
-        border-radius: 10px;
-    }
-  
-    .return p {
-        color: black;
-        cursor: pointer;
-    }
-  
     input {
         padding: 0.5rem 0;
         margin: 0 2rem;
@@ -133,8 +113,7 @@
         justify-content: center;
         gap: 10px;
         background-color: #D9D9D9;
-        border-bottom-left-radius: 10px;
-        border-bottom-right-radius: 10px;
+        border-radius: 10px;
     }
   
     h1 {

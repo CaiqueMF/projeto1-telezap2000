@@ -85,7 +85,7 @@
     <h1>Editar Turma</h1>
     <form on:submit|preventDefault={updateTurma}>
       <select bind:value={id_cadeira} required>
-        <option value="" disabled selected>Selecione a Cadeira</option>
+        <option value="" disabled selected>Selecione a Disciplina</option>
         {#each cadeiras as cadeira}
           <option value={cadeira.id}>{cadeira.nome}</option>
         {/each}
