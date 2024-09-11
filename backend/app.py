@@ -76,26 +76,6 @@ class Feedback(db.Model):
 def create_tables():
     db.create_all()
 
-@app.route('/api/feedbacks', methods=['POST'])
-def add_feedback():
-    data = request.get_json()
-    novo_feedback = Feedback(
-    id_professor=data['id_professor'],
-    feedback=data['feedback'],  # Corrigido para usar colchetes
-)
-    db.session.add(novo_feedback)
-    db.session.commit()
-    return jsonify({'message': 'Feedback adicionada com sucesso!'}), 201
-
-@app.route('/api/feedbacks', methods=['GET'])
-def get_feedbacks():
-    feedbacks = Feedback.query.all()
-    return jsonify([{
-        'id': feedback.id,
-        'id_professor': feedback.id_professor,
-        'feedback': feedback.feedback
-    } for feedback in feedbacks])
-
 @app.route('/api/cadeiras', methods=['POST'])
 def add_cadeira():
     data = request.get_json()
@@ -352,6 +332,26 @@ def update_alocacao(id):
     alocacao.horario = data.get('horario', alocacao.horario)
     db.session.commit()
     return jsonify({'message': 'Alocação atualizada com sucesso!'}), 200
+
+@app.route('/api/feedbacks', methods=['POST'])
+def add_feedback():
+    data = request.get_json()
+    novo_feedback = Feedback(
+    id_professor=data['id_professor'],
+    feedback=data['feedback'],
+)
+    db.session.add(novo_feedback)
+    db.session.commit()
+    return jsonify({'message': 'Feedback adicionada com sucesso!'}), 201
+
+@app.route('/api/feedbacks', methods=['GET'])
+def get_feedbacks():
+    feedbacks = Feedback.query.all()
+    return jsonify([{
+        'id': feedback.id,
+        'id_professor': feedback.id_professor,
+        'feedback': feedback.feedback
+    } for feedback in feedbacks])
 
 #teste de login
 users = {

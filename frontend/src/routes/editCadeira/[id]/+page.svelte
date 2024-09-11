@@ -11,7 +11,8 @@
     let semestre = '';
     let aulas_prolongadas = false;
     let curso = '';
-  
+    let error_message = false
+
     $: id = $page.params.id;
   
     onMount(async () => {
@@ -54,6 +55,7 @@
         goto('/cadeiras');
       } catch (error) {
         console.error(error);
+        error_message = true
       }
     }
   </script>
@@ -92,5 +94,8 @@
       <button type="submit">Atualizar</button>
     </form>
     <button on:click={deletaCadeira}>Deletar</button>
+    {#if error_message}
+      <p>A disciplina que você tentou deletar está alocada com uma turma, remova a alocação dessa disciplina para conseguir deletá-la</p>
+    {/if}
   </main>
   

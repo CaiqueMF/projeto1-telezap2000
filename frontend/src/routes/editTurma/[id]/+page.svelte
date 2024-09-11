@@ -4,7 +4,7 @@
     import axios from 'axios';
     import { goto } from '$app/navigation';
   
-    let id;
+    let id, dia, horario;
     let id_cadeira = '';
     let id_professor = '';
     let id_sala = '';
@@ -22,6 +22,21 @@
       await fetchTurma();
       await fetchOptions();
     });
+
+    async function addAlocacao() {
+		try {
+			const newAlocacao = {
+		  	id_turma: id,
+		  	dia,
+		  	horario,
+		};
+			await axios.post('http://localhost:5000/api/alocacoes', newAlocacao);
+			dia = ''
+      horario = ''
+	  	} catch (error) {
+			console.error(error);
+	  }
+	}
 
     async function fetchOptions() {
     try {
@@ -115,5 +130,25 @@
         <button type="submit">Atualizar</button>
     </form>
     <button on:click={deleteTurma}>Deletar</button>
+    <h2>Alocar turma</h2>
+    <form on:submit|preventDefault={addAlocacao}>
+      <select bind:value={dia}>
+        <option value="Segunda-feira">Segunda-feira</option>
+        <option value="Terça-feira">Terça-feira</option>
+        <option value="Quarta-feira">Quarta-feira</option>
+        <option value="Quinta-feira">Quinta-feira</option>
+        <option value="Sexta-feira">Sexta-feira</option>
+        <option value="Sábado">Sábado</option>
+      </select>
+      <select bind:value={horario}>
+        <option value="8:00">8:00</option>
+        <option value="10:00">10:00</option>
+        <option value="14:00">14:00</option>
+        <option value="16:00">16:00</option>
+        <option value="18:00">18:00</option>
+        <option value="20:00">20:00</option>
+      </select>
+    <button type="submit">Alocar turma</button>
+    </form>
   </main>
   
