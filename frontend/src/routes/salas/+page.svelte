@@ -38,7 +38,14 @@
   <input type="text" bind:value={pesquisaNome} placeholder="Buscar sala">
   <form on:submit|preventDefault={addSala}>
     <input bind:value={nome} placeholder="Nome" required />
-    <input bind:value={tipos} placeholder="Tipo de sala" required />
+    <select bind:value={tipos} required>
+      <option value="" disabled selected>Tipo de sala</option>
+      <option value="Sala normal">Sala normal</option>
+      <option value="Sala grande">Sala grande</option>
+      <option value="Atelie">Ateliê</option>
+      <option value="Laboratorio basico">Laboratório básico</option>
+      <option value="Laboratorio avançado">Laboratório avançado</option>
+    </select>
     <button type="submit">Adicionar</button>
   </form>
   <ul>

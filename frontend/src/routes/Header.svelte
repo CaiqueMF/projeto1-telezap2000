@@ -1,5 +1,8 @@
 <script>
 	import { page } from '$app/stores';
+	import { token, user } from '../store';
+
+	$: currentUser = $user.role;
 </script>
 
 <header>
@@ -8,8 +11,14 @@
 			<li aria-current={$page.url.pathname === '/' ? 'page' : undefined}>
 				<a href="/">Home</a>
 			</li>
+			{#if currentUser == "user"}
+			<li aria-current={$page.url.pathname === '/professor' ? 'page' : undefined}>
+				<a href="/professor">Professor</a>
+			</li>
+			{/if}
+			{#if currentUser == "admin"}
 			<li aria-current={$page.url.pathname === '/cadeiras' ? 'page' : undefined}>
-				<a href="/cadeiras">Cadeiras</a>
+				<a href="/cadeiras">Disciplinas</a>
 			</li>
 			<li aria-current={$page.url.pathname === '/professores' ? 'page' : undefined}>
 				<a href="/professores">Professores</a>
@@ -20,26 +29,34 @@
 			<li aria-current={$page.url.pathname === '/turmas' ? 'page' : undefined}>
 				<a href="/turmas">Turmas</a>
 			</li>
+			{/if}
+			{#if currentUser == null}
+			<li aria-current={$page.url.pathname === '/login' ? 'page' : undefined}>
+				<a href="/login">Login</a>
+			</li>
+			{/if}
 		</ul>
-		
 	</nav>
 </header>
 
 <style>
 	header {
 		display: flex;
+		width: 100%;
 		justify-content: center;
+		background: #5A7302;
+		border-bottom-left-radius: 10px;
+		border-bottom-right-radius: 10px;
 	}
 
 	nav {
 		display: flex;
 		justify-items: center;
 		justify-content: center;
-		--background: rgba(255, 255, 255, 0.7);
+		background: #5A7302;
 	}
 
 	ul {
-		position: relative;
 		padding: 0;
 		margin: 0;
 		height: 3em;
@@ -47,25 +64,16 @@
 		justify-content: center;
 		align-items: center;
 		list-style: none;
-		background: var(--background);
 		background-size: contain;
 	}
 
 	li {
-		position: relative;
+		padding: 10px;
 		height: 100%;
 	}
 
-	li[aria-current='page']::before {
-		--size: 6px;
-		content: '';
-		width: 0;
-		height: 0;
-		position: absolute;
-		top: 0;
-		left: calc(50% - var(--size));
-		border: var(--size) solid transparent;
-		border-top: var(--size) solid var(--color-theme-1);
+	li[aria-current='page'] a {
+		font-weight: 900;
 	}
 
 	nav a {
@@ -73,16 +81,13 @@
 		height: 100%;
 		align-items: center;
 		padding: 0 0.5rem;
-		color: var(--color-text);
+		color: white;
 		font-weight: 700;
 		font-size: 0.8rem;
 		text-transform: uppercase;
 		letter-spacing: 0.1em;
-		text-decoration: none;
 		transition: color 0.2s linear;
 	}
 
-	a:hover {
-		color: var(--color-theme-1);
-	}
+
 </style>

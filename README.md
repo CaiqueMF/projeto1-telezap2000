@@ -5,7 +5,7 @@ Projeto da equipe Telezap2000 para cadeira projeto 1
 
   
 
-O projeto tem como objetivo melhorar o processo de alocação de salas do Instituto UFC virtual
+O projeto FADA tem como objetivo melhorar o processo de alocação de salas do Instituto UFC virtual
 
   
 

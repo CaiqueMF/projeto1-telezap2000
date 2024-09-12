@@ -1,10 +1,10 @@
 <script>
-  import Login from "./login.svelte";
-
-	
+  import Home from "./home.svelte"
 </script>
-  
+<head>
+  <script src="https://kit.fontawesome.com/81be75e182.js" crossorigin="anonymous"></script>
+</head>
 <main>
-    <Login/>
+    <Home/>
 </main>
   

@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS  # Importe o Flask-CORS
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, get_jwt
 
 app = Flask(__name__)
 CORS(app)  # Habilite CORS para todas as rotas
@@ -11,6 +11,8 @@ app.config['JWT_SECRET_KEY'] = 'senha_mudar_depois'
 jwt = JWTManager(app)
 
 db = SQLAlchemy(app)
+
+blacklist = set()
 
 # Models definition
 professor_cadeira = db.Table('professor_cadeira',
@@ -32,10 +34,9 @@ class Cadeira(db.Model):
                                      secondaryjoin=(id == cadeira_prerequisito.c.prerequisito_id),
                                      backref='prerequisitada_por')
     necessidades_sala = db.Column(db.String(100))
-    obrigatoria = db.Column(db.Boolean, default=False)
-    eletiva = db.Column(db.Boolean, default=False)
-    optativa = db.Column(db.Boolean, default=False)
+    natureza = db.Column(db.String(16))
     semestre = db.Column(db.Integer)
+    aulas_prolongadas = db.Column(db.Boolean, default=False)
     curso = db.Column(db.String(100))
 
 class Sala(db.Model):
@@ -66,6 +67,11 @@ class Alocacao(db.Model):
     horario = db.Column(db.String(50), nullable=False)
     turma = db.relationship('Turma', backref='alocacoes')
 
+class Feedback(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    id_professor = db.Column(db.Integer, db.ForeignKey('professor.id'), nullable=False)
+    feedback = db.Column(db.String(1000), nullable=False)
+
 @app.before_request
 def create_tables():
     db.create_all()
@@ -76,10 +82,9 @@ def add_cadeira():
     nova_cadeira = Cadeira(
         nome=data['nome'],
         necessidades_sala=data.get('necessidades_sala'),
-        obrigatoria=data.get('obrigatoria', False),
-        eletiva=data.get('eletiva', False),
-        optativa=data.get('optativa', False),
+        natureza=data.get('natureza'),
         semestre=data.get('semestre'),
+        aulas_prolongadas=data.get('aulas_prolongadas'),
         curso=data.get('curso')
     )
     db.session.add(nova_cadeira)
@@ -93,10 +98,9 @@ def get_cadeiras():
         'id': cadeira.id,
         'nome': cadeira.nome,
         'necessidades_sala': cadeira.necessidades_sala,
-        'obrigatoria': cadeira.obrigatoria,
-        'eletiva': cadeira.eletiva,
-        'optativa': cadeira.optativa,
+        'natureza': cadeira.natureza,
         'semestre': cadeira.semestre,
+        'aulas_prolongadas': cadeira.aulas_prolongadas,
         'curso': cadeira.curso
     } for cadeira in cadeiras])
 
@@ -110,10 +114,9 @@ def handle_cadeira(id):
             'id': cadeira.id,
             'nome': cadeira.nome,
             'necessidades_sala': cadeira.necessidades_sala,
-            'obrigatoria': cadeira.obrigatoria,
-            'eletiva': cadeira.eletiva,
-            'optativa': cadeira.optativa,
+            'natureza': cadeira.natureza,
             'semestre': cadeira.semestre,
+            'aulas_prolongadas': cadeira.aulas_prolongadas,
             'curso': cadeira.curso
         })
     elif request.method == 'PUT':
@@ -123,10 +126,9 @@ def handle_cadeira(id):
             return jsonify({'message': 'Cadeira não encontrada'}), 404
         cadeira.nome = data.get('nome', cadeira.nome)
         cadeira.necessidades_sala = data.get('necessidades_sala', cadeira.necessidades_sala)
-        cadeira.obrigatoria = data.get('obrigatoria', cadeira.obrigatoria)
-        cadeira.eletiva = data.get('eletiva', cadeira.eletiva)
-        cadeira.optativa = data.get('optativa', cadeira.optativa)
+        cadeira.natureza = data.get('natureza', cadeira.natureza)
         cadeira.semestre = data.get('semestre', cadeira.semestre)
+        cadeira.aulas_prolongadas = data.get('aulas_prolongadas', cadeira.aulas_prolongadas)
         cadeira.curso = data.get('curso', cadeira.curso)
         db.session.commit()
         return jsonify({'message': 'Cadeira atualizada com sucesso!'})
@@ -321,20 +323,49 @@ def get_alocacoes():
         'horario': alocacao.horario
     } for alocacao in alocacoes])
 
-@app.route('/api/alocacoes/<int:id>', methods=['PUT'])
-def update_alocacao(id):
+@app.route('/api/alocacoes/<int:id>', methods=['PUT','DELETE'])
+def handle_alocacao(id):
+    if request.method == 'PUT':
+        data = request.get_json()
+        alocacao = Alocacao.query.get_or_404(id)
+        alocacao.id_turma = data.get('id_turma', alocacao.id_turma)
+        alocacao.dia = data.get('dia', alocacao.dia)
+        alocacao.horario = data.get('horario', alocacao.horario)
+        db.session.commit()
+        return jsonify({'message': 'Alocação atualizada com sucesso!'}), 200
+    elif request.method == 'DELETE':
+        alocacao = Alocacao.query.get(id)
+        if alocacao is None:
+            return jsonify({'message': 'Alocação não encontrada'}), 404
+        db.session.delete(alocacao)
+        db.session.commit()
+        return jsonify({'message': 'Alocação deletada com sucesso!'})
+
+@app.route('/api/feedbacks', methods=['POST'])
+def add_feedback():
     data = request.get_json()
-    alocacao = Alocacao.query.get_or_404(id)
-    alocacao.id_turma = data.get('id_turma', alocacao.id_turma)
-    alocacao.dia = data.get('dia', alocacao.dia)
-    alocacao.horario = data.get('horario', alocacao.horario)
+    novo_feedback = Feedback(
+    id_professor=data['id_professor'],
+    feedback=data['feedback'],
+)
+    db.session.add(novo_feedback)
     db.session.commit()
-    return jsonify({'message': 'Alocação atualizada com sucesso!'}), 200
+    return jsonify({'message': 'Feedback adicionada com sucesso!'}), 201
+
+@app.route('/api/feedbacks', methods=['GET'])
+def get_feedbacks():
+    feedbacks = Feedback.query.all()
+    return jsonify([{
+        'id': feedback.id,
+        'id_professor': feedback.id_professor,
+        'feedback': feedback.feedback
+    } for feedback in feedbacks])
 
 #teste de login
 users = {
     "coordenador": {"password": "123", "role": "admin"},
-    "professor": {"password": "123", "role": "user"}
+    "professor": {"password": "123", "role": "user"},
+    "Liandro": {"password": "123", "role": "user"}
 }
 
 
@@ -355,6 +386,19 @@ def login():
 def protected():
     current_user = get_jwt_identity()
     return jsonify(logged_in_as=current_user), 200
+
+@app.route('/api/logout', methods=['POST'])
+@jwt_required()
+def logout():
+    jti = get_jwt()["jti"]  # JWT ID (jti) é um identificador único para o token JWT
+    blacklist.add(jti)
+    return jsonify(msg="Successfully logged out"), 200
+
+# Verificação do token na blacklist
+@jwt.token_in_blocklist_loader
+def check_if_token_in_blacklist(jwt_header, jwt_payload):
+    jti = jwt_payload["jti"]
+    return jti in blacklist
 
 if __name__ == '__main__':
     app.run(debug=True)
