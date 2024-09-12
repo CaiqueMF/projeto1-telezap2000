@@ -52,6 +52,7 @@
   
 <input type="text" bind:value={pesquisaNome} placeholder="Buscar disciplina">
 <input type="text" bind:value={pesquisaSemestre} placeholder="Buscar semestre">
+<p>Quantidade total de disciplinas: {cadeiras.length}</p>
 <h2>Adicionar Disciplina</h2>
 <form on:submit|preventDefault={addCadeira}>
 	<input bind:value={nome} placeholder="Nome" required />

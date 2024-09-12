@@ -15,6 +15,7 @@
     let cadeiras = [];
     let professores = [];
     let salas = [];
+    let alocacoes = []
   
     $: id = $page.params.id;
   
@@ -40,15 +41,18 @@
 
     async function fetchOptions() {
     try {
-      const [cadeiraRes, professorRes, salaRes] = await Promise.all([
+      const [cadeiraRes, professorRes, salaRes, alocacoesRes] = await Promise.all([
         axios.get('http://localhost:5000/api/cadeiras'),
         axios.get('http://localhost:5000/api/professores'),
-        axios.get('http://localhost:5000/api/salas')
+        axios.get('http://localhost:5000/api/salas'),
+        axios.get('http://localhost:5000/api/alocacoes')
       ]);
       
       cadeiras = cadeiraRes.data;
       professores = professorRes.data;
       salas = salaRes.data;
+      alocacoes = alocacoesRes.data
+      console.log(alocacoes)
     } catch (error) {
       console.error('Erro ao carregar opções:', error);
     }
@@ -94,6 +98,29 @@
         console.error(error);
       }
     }
+
+    async function deleteAlocacao(id_alocacao) {
+      try {
+        await axios.delete(`http://localhost:5000/api/alocacoes/${id_alocacao}`)
+        fetchOptions()
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    async function updateAlocacao(id_alocacao) {
+      try {
+        const updatedAlocacao = {
+          id_turma: id,
+		  	  dia,
+		  	  horario
+        }
+        await axios.put(`http://localhost:5000/api/alocacoes/${id_alocacao}`, updatedAlocacao)
+        fetchOptions();
+    } catch (error) {
+        console.error(error);
+      }
+    }
   </script>
   
   <main>
@@ -130,7 +157,7 @@
         <button type="submit">Atualizar</button>
     </form>
     <button on:click={deleteTurma}>Deletar</button>
-    <h2>Alocar turma</h2>
+    <h2>Alocar turma ou editar horário</h2>
     <form on:submit|preventDefault={addAlocacao}>
       <select bind:value={dia}>
         <option value="Segunda-feira">Segunda-feira</option>
@@ -148,7 +175,14 @@
         <option value="18:00">18:00</option>
         <option value="20:00">20:00</option>
       </select>
-    <button type="submit">Alocar turma</button>
+    <button type="submit">Adiconar horário</button>
     </form>
+    {#each alocacoes as alocacao}
+      {#if alocacao.id_turma == id}
+      <p>{alocacao.dia} - {alocacao.horario}</p>
+      <button on:click={updateAlocacao(alocacao.id)}>Alterar horário</button>
+      <button on:click={deleteAlocacao(alocacao.id)}>Deletar horário</button>
+      {/if}
+    {/each}
   </main>
   

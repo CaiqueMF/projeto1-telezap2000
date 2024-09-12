@@ -1,7 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import axios from 'axios';
-  
+
   let id_cadeira = '';
   let id_professor = '';
   let id_sala = '';
@@ -13,10 +13,12 @@
   let professores = [];
   let salas = [];
   let turmas = [];
+  let alocacoes = []; // Lista de alocações
 
   onMount(async () => {
     await fetchOptions();
     await fetchTurmas();
+    await fetchAlocacoes(); // Chama a função para buscar alocações
   });
 
   async function fetchOptions() {
@@ -26,7 +28,7 @@
         axios.get('http://localhost:5000/api/professores'),
         axios.get('http://localhost:5000/api/salas')
       ]);
-      
+
       cadeiras = cadeiraRes.data;
       professores = professorRes.data;
       salas = salaRes.data;
@@ -36,47 +38,68 @@
   }
 
   async function fetchTurmas() {
-      try {
-          const response = await axios.get('http://localhost:5000/api/turmas');
-          turmas = await Promise.all(response.data.map(async turma => {
-            // Buscar os nomes com base nos IDs
-            const cadeira = cadeiras.find(c => c.id === turma.id_cadeira);
-            const professor = professores.find(p => p.id === turma.id_professor);
-            const sala = salas.find(s => s.id === turma.id_sala);
+    try {
+      const response = await axios.get('http://localhost:5000/api/turmas');
+      turmas = await Promise.all(
+        response.data.map(async (turma) => {
+          // Buscar os nomes com base nos IDs
+          const cadeira = cadeiras.find((c) => c.id === turma.id_cadeira);
+          const professor = professores.find((p) => p.id === turma.id_professor);
+          const sala = salas.find((s) => s.id === turma.id_sala);
 
-            return {
-              ...turma,
-              nome_cadeira: cadeira ? cadeira.nome : 'Desconhecido',
-              nome_professor: professor ? professor.nome : 'Desconhecido',
-              nome_sala: sala ? sala.nome : 'Desconhecido'
-            };
-          }));
-      } catch (error) {
-          console.error('Erro ao carregar turmas:', error);
-      }
+          return {
+            ...turma,
+            nome_cadeira: cadeira ? cadeira.nome : 'Desconhecido',
+            nome_professor: professor ? professor.nome : 'Desconhecido',
+            nome_sala: sala ? sala.nome : 'Desconhecido',
+            alocacoes: [] // Inicializa a lista de alocações para essa turma
+          };
+        })
+      );
+    } catch (error) {
+      console.error('Erro ao carregar turmas:', error);
+    }
+  }
+
+  async function fetchAlocacoes() {
+    try {
+      const response = await axios.get('http://localhost:5000/api/alocacoes');
+      alocacoes = response.data;
+
+      // Relacionar as alocações com as turmas
+      turmas = turmas.map(turma => {
+        const alocacoesDaTurma = alocacoes.filter(alocacao => alocacao.id_turma === turma.id);
+        return {
+          ...turma,
+          alocacoes: alocacoesDaTurma // Associa as alocações à turma correspondente
+        };
+      });
+    } catch (error) {
+      console.error('Erro ao carregar alocações:', error);
+    }
   }
 
   async function addTurma() {
-      try {
-          const newTurma = {
-              id_cadeira,
-              id_professor,
-              id_sala,
-              n_turma,
-              n_vagas,
-              curso
-          };
-          await axios.post('http://localhost:5000/api/turmas', newTurma);
-          await fetchTurmas();
-          id_cadeira = '';
-          id_professor = '';
-          id_sala = '';
-          n_turma = '';
-          n_vagas = '';
-          curso = '';
-      } catch (error) {
-          console.error('Erro ao adicionar turma:', error);
-      }
+    try {
+      const newTurma = {
+        id_cadeira,
+        id_professor,
+        id_sala,
+        n_turma,
+        n_vagas,
+        curso
+      };
+      await axios.post('http://localhost:5000/api/turmas', newTurma);
+      await fetchTurmas();
+      id_cadeira = '';
+      id_professor = '';
+      id_sala = '';
+      n_turma = '';
+      n_vagas = '';
+      curso = '';
+    } catch (error) {
+      console.error('Erro ao adicionar turma:', error);
+    }
   }
 </script>
 
@@ -116,43 +139,62 @@
   <button type="submit">Adicionar</button>
 </form>
 
+<h2>Turmas e Alocações</h2>
+
 <table>
   <tr>
-    <th>Disciplina:</th>
-    <th>Professor:</th>
-    <th>Sala:</th>
-    <th>Turma:</th>
-    <th>Vagas:</th>
-    <th>Curso:</th>
+    <th>Disciplina</th>
+    <th>Professor</th>
+    <th>Sala</th>
+    <th>Turma</th>
+    <th>Vagas</th>
+    <th>Curso</th>
+    <th>Alocações (Dia e Horário)</th>
     <th>Edição</th>
   </tr>
   {#each turmas as turma (turma.id)}
     <tr>
-        <td>{turma.nome_cadeira}</td>
-        <td>{turma.nome_professor}</td>
-        <td>{turma.nome_sala}</td>
-        <td>{turma.n_turma}</td>
-        <td>{turma.n_vagas}</td>
-        <td>{turma.curso}</td>
-        <td><a href={`../editTurma/${turma.id}`}>Editar</a></td>
+      <td>{turma.nome_cadeira}</td>
+      <td>{turma.nome_professor}</td>
+      <td>{turma.nome_sala}</td>
+      <td>{turma.n_turma}</td>
+      <td>{turma.n_vagas}</td>
+      <td>{turma.curso}</td>
+      <td>
+        {#if turma.alocacoes.length > 0}
+          <ul>
+            {#each turma.alocacoes as alocacao}
+              <li>{alocacao.dia}, {alocacao.horario}</li>
+            {/each}
+          </ul>
+        {:else}
+          <span>Sem alocação</span>
+        {/if}
+      </td>
+      <td><a href={`../editTurma/${turma.id}`}>Editar</a></td>
     </tr>
   {/each}
 </table>
 
 <style>
   table {
-	  font-family: arial, sans-serif;
-	  border-collapse: collapse;
-	  width: 100%;
-	}
-	
-	td, th {
-	  border: 1px solid #e0e0e0;
-	  text-align: left;
-	  padding: 8px;
-	}
-  
-	tr:nth-child(even) {
-	  background-color: #e0e0e0;
-	}
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  td, th {
+    border: 1px solid #e0e0e0;
+    text-align: left;
+    padding: 8px;
+  }
+
+  tr:nth-child(even) {
+    background-color: #e0e0e0;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 20px;
+  }
 </style>

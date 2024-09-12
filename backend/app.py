@@ -323,15 +323,23 @@ def get_alocacoes():
         'horario': alocacao.horario
     } for alocacao in alocacoes])
 
-@app.route('/api/alocacoes/<int:id>', methods=['PUT'])
-def update_alocacao(id):
-    data = request.get_json()
-    alocacao = Alocacao.query.get_or_404(id)
-    alocacao.id_turma = data.get('id_turma', alocacao.id_turma)
-    alocacao.dia = data.get('dia', alocacao.dia)
-    alocacao.horario = data.get('horario', alocacao.horario)
-    db.session.commit()
-    return jsonify({'message': 'Alocação atualizada com sucesso!'}), 200
+@app.route('/api/alocacoes/<int:id>', methods=['PUT','DELETE'])
+def handle_alocacao(id):
+    if request.method == 'PUT':
+        data = request.get_json()
+        alocacao = Alocacao.query.get_or_404(id)
+        alocacao.id_turma = data.get('id_turma', alocacao.id_turma)
+        alocacao.dia = data.get('dia', alocacao.dia)
+        alocacao.horario = data.get('horario', alocacao.horario)
+        db.session.commit()
+        return jsonify({'message': 'Alocação atualizada com sucesso!'}), 200
+    elif request.method == 'DELETE':
+        alocacao = Alocacao.query.get(id)
+        if alocacao is None:
+            return jsonify({'message': 'Alocação não encontrada'}), 404
+        db.session.delete(alocacao)
+        db.session.commit()
+        return jsonify({'message': 'Alocação deletada com sucesso!'})
 
 @app.route('/api/feedbacks', methods=['POST'])
 def add_feedback():
