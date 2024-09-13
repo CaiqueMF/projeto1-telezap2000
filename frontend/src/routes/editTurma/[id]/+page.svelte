@@ -34,6 +34,7 @@
 			await axios.post('http://localhost:5000/api/alocacoes', newAlocacao);
 			dia = ''
       horario = ''
+      fetchOptions()
 	  	} catch (error) {
 			console.error(error);
 	  }
