@@ -78,6 +78,9 @@ class Login(db.Model):
     login = db.Column(db.String(50), nullable=False)
     senha = db.Column(db.String(50), nullable=False)
     role = db.Column(db.String(50), nullable=False)
+    id_professor = db.Column(db.Integer, db.ForeignKey('professor.id'))
+    professor = db.relationship('Professor', backref='Login')
+
 
 def inicializar_logins():
     logins_existentes = db.session.query(Login).count()
@@ -234,7 +237,28 @@ def add_professor():
     )
     db.session.add(novo_professor)
     db.session.commit()
-    return jsonify({'message': 'Professor adicionado com sucesso!'}), 201
+
+    nome_segmentado = data['nome'].split()
+    primeiro_nome = nome_segmentado[0]
+    iniciais = ''.join([part[0] for part in nome_segmentado[1:]]) if len(nome_segmentado) > 1 else ''
+    login_base = f"{primeiro_nome}{iniciais}"
+    login = login_base
+    counter = 1
+    while Login.query.filter_by(login=login).first() is not None:
+        login = f"{login_base}{counter}"
+        counter += 1
+
+    novo_login = Login(
+        nome = data['nome'],
+        login = login,
+        senha = '123',
+        role = 'user',
+        id_professor = novo_professor.id
+    )
+    db.session.add(novo_login)
+    db.session.commit()
+
+    return jsonify({'message': 'Professor adicionado com sucesso!','login': login}), 201
 
 @app.route('/api/professores', methods=['GET'])
 def get_professores():
@@ -250,23 +274,29 @@ def handle_professor(id):
         professor = Professor.query.get(id)
         if professor is None:
             return jsonify({'message': 'Professor não encontrado'}), 404
+        login = Login.query.filter_by(id_professor=id).first()
         return jsonify({
             'id': professor.id,
-            'nome': professor.nome
+            'nome': professor.nome,
+            'login': login.login
         })
     elif request.method == 'PUT':
         data = request.get_json()
         professor = Professor.query.get(id)
         if professor is None:
             return jsonify({'message': 'Professor não encontrado'}), 404
+        login = Login.query.filter_by(id_professor=id).first()
         professor.nome = data.get('nome', professor.nome)
+        login.login = data.get('login',login.login)
         db.session.commit()
         return jsonify({'message': 'Professor atualizado com sucesso!'})
     elif request.method == 'DELETE':
         professor = Professor.query.get(id)
         if professor is None:
             return jsonify({'message': 'Professor não encontrado'}), 404
+        login = Login.query.filter_by(id_professor=id).first()
         db.session.delete(professor)
+        db.session.delete(login)
         db.session.commit()
         return jsonify({'message': 'Professor deletado com sucesso!'})
 
