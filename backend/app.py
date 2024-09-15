@@ -72,9 +72,44 @@ class Feedback(db.Model):
     id_professor = db.Column(db.Integer, db.ForeignKey('professor.id'), nullable=False)
     feedback = db.Column(db.String(1000), nullable=False)
 
+class Login(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(50), nullable=False)
+    login = db.Column(db.String(50), nullable=False)
+    senha = db.Column(db.String(50), nullable=False)
+    role = db.Column(db.String(50), nullable=False)
+
+def inicializar_logins():
+    logins_existentes = db.session.query(Login).count()
+    if logins_existentes == 0:
+        coordenadores = [
+            Login(
+            nome = 'nome coordenador 1',
+            login = 'coordenador1',
+            senha = '123',
+            role = 'admin'
+            ),
+            Login(
+            nome = 'nome coordenador 2',
+            login = 'coordenador2',
+            senha = '123',
+            role = 'admin'
+            ),
+            Login(
+            nome = 'nome coordenador 2',
+            login = 'coordenador2',
+            senha = '123',
+            role = 'admin'
+            ),
+
+        ]
+        db.session.add_all(coordenadores)
+        db.session.commit()
+
 @app.before_request
 def create_tables():
     db.create_all()
+    inicializar_logins()
 
 @app.route('/api/cadeiras', methods=['POST'])
 def add_cadeira():
@@ -361,12 +396,6 @@ def get_feedbacks():
         'feedback': feedback.feedback
     } for feedback in feedbacks])
 
-#teste de login
-users = {
-    "coordenador": {"password": "123", "role": "admin"},
-    "professor": {"password": "123", "role": "user"},
-    "Liandro": {"password": "123", "role": "user"}
-}
 
 
 @app.route('/api/login', methods=['POST'])
@@ -374,12 +403,13 @@ def login():
     username = request.json.get('username')
     password = request.json.get('password')
 
-    user = users.get(username)
-    if not user or user['password'] != password:
+    user = Login.query.filter_by(login=username).first()
+    print(db.session.query(Login).count())
+    if not user or user.senha != password:
         return jsonify({"msg": "Bad username or password"}), 401
 
-    access_token = create_access_token(identity={"username": username, "role": user['role']})
-    return jsonify(access_token=access_token, role = user['role'])
+    access_token = create_access_token(identity={"username": username, "role": user.role})
+    return jsonify(access_token=access_token, role = user.role)
 
 @app.route('/api/protected', methods=['GET'])
 @jwt_required()
