@@ -14,7 +14,14 @@
   let salas = [];
   let turmas = [];
   let alocacoes = []; // Lista de alocações
-
+  let dicionario_dia = {
+      "1":"segunda feira",
+      "2":"terça feira",
+      "3":"quarta feira",
+      "4":"quinta feira",
+      "5":"sexta feira",
+      "6":"sábado",
+    }
   onMount(async () => {
     await fetchOptions();
     await fetchTurmas();
@@ -164,7 +171,7 @@
         {#if turma.alocacoes.length > 0}
           <ul>
             {#each turma.alocacoes as alocacao}
-              <li>{alocacao.dia}, {alocacao.horario}</li>
+              <li>{dicionario_dia[alocacao.dia]} - {alocacao.horario}:00 à {alocacao.horario+alocacao.duracao}:00</li>
             {/each}
           </ul>
         {:else}

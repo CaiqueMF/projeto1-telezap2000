@@ -11,14 +11,21 @@
     let n_turma = '';
     let n_vagas = '';
     let curso = '';
-
+    let aulas_prolongadas = false
     let cadeiras = [];
     let professores = [];
     let salas = [];
     let alocacoes = []
-  
+
     $: id = $page.params.id;
-  
+    let dicionario_dia = {
+      "1":"segunda feira",
+      "2":"terça feira",
+      "3":"quarta feira",
+      "4":"quinta feira",
+      "5":"sexta feira",
+      "6":"sábado",
+    }
     onMount(async () => {
       await fetchTurma();
       await fetchOptions();
@@ -30,6 +37,7 @@
 		  	id_turma: id,
 		  	dia,
 		  	horario,
+        aulas_prolongadas
 		};
 			await axios.post('http://localhost:5000/api/alocacoes', newAlocacao);
 			dia = ''
@@ -113,7 +121,8 @@
         const updatedAlocacao = {
           id_turma: id,
 		  	  dia,
-		  	  horario
+		  	  horario,
+          aulas_prolongadas
         }
         await axios.put(`http://localhost:5000/api/alocacoes/${id_alocacao}`, updatedAlocacao)
         fetchOptions();
@@ -160,28 +169,30 @@
     <h2>Alocar turma ou editar horário</h2>
     <form on:submit|preventDefault={addAlocacao}>
       <select bind:value={dia}>
-        <option value="Segunda-feira">Segunda-feira</option>
-        <option value="Terça-feira">Terça-feira</option>
-        <option value="Quarta-feira">Quarta-feira</option>
-        <option value="Quinta-feira">Quinta-feira</option>
-        <option value="Sexta-feira">Sexta-feira</option>
-        <option value="Sábado">Sábado</option>
+        <option value="1">Segunda-feira</option>
+        <option value="2">Terça-feira</option>
+        <option value="3">Quarta-feira</option>
+        <option value="4">Quinta-feira</option>
+        <option value="5">Sexta-feira</option>
+        <option value="6">Sábado</option>
       </select>
       <select bind:value={horario}>
-        <option value="8:00">8:00</option>
-        <option value="10:00">10:00</option>
-        <option value="14:00">14:00</option>
-        <option value="16:00">16:00</option>
-        <option value="18:00">18:00</option>
-        <option value="20:00">20:00</option>
+        <option value="8">8:00</option>
+        <option value="10">10:00</option>
+        <option value="14">14:00</option>
+        <option value="16">16:00</option>
+        <option value="18">18:00</option>
+        <option value="20">20:00</option>
       </select>
+      <input type="checkbox" bind:checked={aulas_prolongadas} /> Aulas prolongadas
     <button type="submit">Adiconar horário</button>
     </form>
     {#each alocacoes as alocacao}
       {#if alocacao.id_turma == id}
-      <p>{alocacao.dia} - {alocacao.horario}</p>
+      <p>{dicionario_dia[alocacao.dia]} - {alocacao.horario}:00</p>
       <button on:click={updateAlocacao(alocacao.id)}>Alterar horário</button>
       <button on:click={deleteAlocacao(alocacao.id)}>Deletar horário</button>
+      
       {/if}
     {/each}
   </main>
