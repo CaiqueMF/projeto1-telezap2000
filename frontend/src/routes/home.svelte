@@ -34,24 +34,26 @@
 </script>
 
 <main>
-  <h1>Organize seus <span>Horários</span></h1>
-  <h3>Conte com a ajuda da <span>Fada</span> para buscar e organizar suas disciplinas</h3>
-  
-  <input type="text" placeholder="🔍︎" bind:value={pesquisa}>
-  
-  {#each resultados as resultado}
-    {#if resultado.nome.toLowerCase().includes(pesquisa.toLowerCase())}
-        <div class="resultado">{resultado.nome}</div>
-    {/if}
-  {/each}
+    <div class='busca'>
+        <h1>Venha <span>organizar</span> os seus horários</h1>
+        <h3>Conte com a ajuda da Fada para visualizar as disponibilidades das salas agora e durante a semana</h3>
+        <input type="text" placeholder="🔍︎" bind:value={pesquisa}>
+        {#each resultados as resultado}
+            {#if resultado.nome.toLowerCase().includes(pesquisa.toLowerCase())}
+                <div class="resultado">{resultado.nome}</div>
+            {/if}
+        {/each}
+    </div>
+    <div class="fada">
+    <img src="fada.jpg" alt="Fada">
+    </div>
 </main>
 
 <style>
     main {
         display: flex;
-        flex-direction: column;
         align-items: center;
-        justify-content: flex-start;
+        justify-content: space-evenly;
         color: black;
     }
 
@@ -63,31 +65,44 @@
     }
 
     h3 {
-        font-family: 'Marvel', sans-serif;
-        padding: 10% 0;
+        font-family: 'Outfit', sans-serif;
+        padding-bottom: 10%;
     }
 
     span {
-        color: #5A7302;
+        color: #244E2C;
     }
 
     input {
         width: 100%;
-        background: #5A7302;
-        border-radius: 20px;
+        background: #BC4749;
+        border-radius: 30px;
         border-style: none;
         height: 5vh;
         padding-left: 3%;
+        box-shadow: inset 0 1px 2px rgba(0,0,0,.39), 0 -1px 1px #FFF, 0 1px 0 #FFF;
     }
 
     input::placeholder {
-       padding-left: 97%;
-       color: black;
+        position: relative;
+        top: 3%;
+       padding-left: 93%;
+       font-size: x-large;
+       color: white;
     }
 
     .resultado {
         width: 100%;
         padding: 5px;
         border: 1px black solid;
+    }
+
+    .busca {
+        margin-left: 10%;
+        width: 33%;
+    }
+
+    .fada {
+        margin-right: 10%;
     }
 </style>

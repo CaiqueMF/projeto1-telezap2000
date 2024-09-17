@@ -44,7 +44,7 @@
         }
     }); 
 </script>
-  
+<link href="https://fonts.googleapis.com/css2?family=Alata&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
   <main>
     <form on:submit|preventDefault={handleLogin}>
         {#if error}
@@ -72,15 +72,14 @@
     }
   
     form {
-        width: 40%;
+        width: 20%;
         height: 70%;
         display: flex;
         flex-direction: column;
         align-items: center;
         background-color: #5A7302;
         color: black;
-        border: 1px solid black;
-        border-radius: 10px;
+        border-radius: 20px;
         position: relative;
     }
   
@@ -94,7 +93,7 @@
     }
   
     button {
-        background-color: #565151;
+        background-color: #BC4749;
         border-style: none;
         padding: 1rem;
         margin: 0 2rem;
@@ -102,7 +101,9 @@
         cursor: pointer;
         color: white;
         font-size: 30px;
-        border-radius: 10px;
+        border-radius: 11px;
+        font-weight: 500;
+        font-family: "Alata";
     }
   
     .inputs {
@@ -112,11 +113,15 @@
         flex-direction: column;
         justify-content: center;
         gap: 10px;
-        background-color: #D9D9D9;
-        border-radius: 10px;
+        border-radius: 20px;
+        background-color: white;
+        border-radius: 20px;
+        border: 1px solid black;
     }
   
     h1 {
+        font-family: 'Times New Roman';
+        font-weight: 400;
         position: relative;
         bottom: 12%;
     }
