@@ -490,7 +490,7 @@ def login():
         return jsonify({"msg": "Bad username or password"}), 401
 
     access_token = create_access_token(identity={"username": username, "role": user.role})
-    return jsonify(access_token=access_token, role = user.role)
+    return jsonify(access_token=access_token, role = user.role, id_professor = user.id_professor)
 
 @app.route('/api/protected', methods=['GET'])
 @jwt_required()
