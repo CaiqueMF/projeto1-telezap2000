@@ -381,9 +381,8 @@ def handle_salas_livres():
             Turma.id_sala == sala.id,
             Alocacao.dia == dia_semana,
             Alocacao.horario <= hora_atual,
-            (func.time(Alocacao.horario) + func.time(Alocacao.duracao * 3600)) > hora_atual
+            (func.time(Alocacao.horario) + func.time(Alocacao.duracao)) > hora_atual
         ).first()
-
         if turma_com_horario:
             continue
         else:
@@ -394,10 +393,9 @@ def handle_salas_livres():
             ).order_by(Alocacao.horario.asc()).first()
 
             if proximo_horario:
-                hora_final = (datetime.combine(datetime.today(), proximo_horario.horario) + timedelta(hours=proximo_horario.duracao)).time()
                 salas_livres.append({
                     'sala': sala.nome,
-                    'disponivel': hora_final.strftime('%H:%M:%S')
+                    'disponivel': proximo_horario.horario.strftime('%H:%M:%S')
                 })
             else:
                 salas_livres.append({
@@ -440,10 +438,11 @@ def get_alocacoes():
 def handle_alocacao(id):
     if request.method == 'PUT':
         data = request.get_json()
+        print(data)
         alocacao = Alocacao.query.get_or_404(id)
         alocacao.id_turma = data.get('id_turma', alocacao.id_turma)
         alocacao.dia = data.get('dia', alocacao.dia)
-        alocacao.horario = data.get('horario', alocacao.horario)
+        alocacao.horario = time(int(data.get('horario', alocacao.horario)),0)
         duracao = 2
         if data.get('aulas_prolongadas'):
             duracao = 4

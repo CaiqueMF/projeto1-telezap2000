@@ -169,11 +169,9 @@
       <td>{turma.curso}</td>
       <td>
         {#if turma.alocacoes.length > 0}
-          <ul>
             {#each turma.alocacoes as alocacao}
-              <li>{dicionario_dia[alocacao.dia]} - {alocacao.horario}:00 à {alocacao.horario+alocacao.duracao}:00</li>
+              <p>{dicionario_dia[alocacao.dia]} - {alocacao.horario}:00 à {alocacao.horario+alocacao.duracao}:00</p>
             {/each}
-          </ul>
         {:else}
           <span>Sem alocação</span>
         {/if}

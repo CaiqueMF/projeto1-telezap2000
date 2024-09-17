@@ -42,6 +42,7 @@
 			await axios.post('http://localhost:5000/api/alocacoes', newAlocacao);
 			dia = ''
       horario = ''
+      fetchOptions()
 	  	} catch (error) {
 			console.error(error);
 	  }
@@ -85,11 +86,11 @@
       try {
         const updatedTurma = {
             id_cadeira,
-              id_professor,
-              id_sala,
-              n_turma,
-              n_vagas,
-              curso
+            id_professor,
+            id_sala,
+            n_turma,
+            n_vagas,
+            curso
         };
         await axios.put(`http://localhost:5000/api/turmas/${id}`, updatedTurma);
         goto('/turmas');
