@@ -3,13 +3,13 @@
     import axios from 'axios';
 	import { token, user } from '../../store';
 
-	$: currentUser = $user.username;
-    let id_professor = ''; // Captura do id do professor logado
+	$: currentUser = $user.id_professor;
 
     let cadeiras = [];
     let professores = [];
     let salas = [];
     let turmas = [];
+    let alocacoes = []
 
     let feedback = '';
     let feedbackSuccess = ''; // Mensagem de sucesso no envio do feedback
@@ -18,6 +18,8 @@
     onMount(async () => {
         await fetchOptions();
         await fetchTurmas();
+        await fetchAlocacoes();
+        console.log(currentUser)
     });
 
     async function fetchOptions() {
@@ -32,7 +34,6 @@
             professores = professorRes.data;
             salas = salaRes.data;
 
-            $: id_professor = professores.find(p => p.nome === currentUser)?.id || '';
         } catch (error) {
             console.error('Erro ao carregar opções:', error);
         }
@@ -46,7 +47,7 @@
 
         try {
             const newFeedback = {
-                id_professor,
+                currentUser,
                 feedback
             };
             await axios.post('http://localhost:5000/api/feedbacks', newFeedback);
@@ -79,16 +80,37 @@
             console.error('Erro ao carregar turmas:', error);
         }
     }
+
+    async function fetchAlocacoes() {
+        try {
+            const response = await axios.get('http://localhost:5000/api/alocacoes');
+            alocacoes = response.data;
+            turmas = turmas.map(turma => {
+                const alocacoesDaTurma = alocacoes.filter(alocacao => alocacao.id_turma === turma.id);
+                return {
+                    ...turma,
+                    alocacoes: alocacoesDaTurma.length > 0 ? alocacoesDaTurma : [] // Se não houver alocações, mantém o array vazio
+                };
+            });
+        } catch (error) {
+            console.error('Erro ao carregar alocações:', error);
+        }
+    }
 </script>
 
 <main>
     <h1>Minhas Turmas</h1>
     <div id="turmas">
         {#each turmas as turma}
-            {#if turma.id_professor == id_professor}
+            {#if turma.id_professor == currentUser}
                 <div class="turma">
                     <p class="nome_disciplina">{turma.nome_cadeira} T{turma.n_turma}</p>
                     <p class="nome_sala">{turma.nome_sala}</p>
+                    {#if turma.alocacoes && turma.alocacoes.length > 0}
+                        {#each turma.alocacoes as alocacao}
+                            <p>{alocacao.horario} - {alocacao.dia}</p>
+                        {/each}
+                    {/if}
                 </div>
             {/if}
         {/each}
