@@ -13,12 +13,19 @@
   let professores = [];
   let salas = [];
   let turmas = [];
-  let alocacoes = [];
-
+  let alocacoes = []; // Lista de alocações
+  let dicionario_dia = {
+      "1":"segunda feira",
+      "2":"terça feira",
+      "3":"quarta feira",
+      "4":"quinta feira",
+      "5":"sexta feira",
+      "6":"sábado",
+    }
   onMount(async () => {
     await fetchOptions();
     await fetchTurmas();
-    await fetchAlocacoes(); 
+    await fetchAlocacoes(); // Chama a função para buscar alocações
   });
 
   async function fetchOptions() {
@@ -65,11 +72,13 @@
     try {
       const response = await axios.get('http://localhost:5000/api/alocacoes');
       alocacoes = response.data;
+
+      // Relacionar as alocações com as turmas
       turmas = turmas.map(turma => {
         const alocacoesDaTurma = alocacoes.filter(alocacao => alocacao.id_turma === turma.id);
         return {
           ...turma,
-          alocacoes: alocacoesDaTurma
+          alocacoes: alocacoesDaTurma // Associa as alocações à turma correspondente
         };
       });
     } catch (error) {
@@ -160,9 +169,11 @@
       <td>{turma.curso}</td>
       <td>
         {#if turma.alocacoes.length > 0}
+          <ul>
             {#each turma.alocacoes as alocacao}
-              <p>{alocacao.dia}, {alocacao.horario}</p>
+              <li>{dicionario_dia[alocacao.dia]} - {alocacao.horario}:00 à {alocacao.horario+alocacao.duracao}:00</li>
             {/each}
+          </ul>
         {:else}
           <span>Sem alocação</span>
         {/if}
@@ -187,5 +198,10 @@
 
   tr:nth-child(even) {
     background-color: #e0e0e0;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 20px;
   }
 </style>

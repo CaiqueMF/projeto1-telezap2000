@@ -10,7 +10,6 @@
     let professores = [];
     let salas = [];
     let turmas = [];
-    let alocacoes = [];
 
     let feedback = '';
     let feedbackSuccess = ''; // Mensagem de sucesso no envio do feedback
@@ -19,7 +18,6 @@
     onMount(async () => {
         await fetchOptions();
         await fetchTurmas();
-        await fetchAlocacoes();
     });
 
     async function fetchOptions() {
@@ -52,9 +50,9 @@
                 feedback
             };
             await axios.post('http://localhost:5000/api/feedbacks', newFeedback);
-            feedback = '';
+            feedback = ''; // Limpar o campo de feedback após o envio
             feedbackSuccess = 'Feedback enviado com sucesso!';
-            feedbackError = ''; 
+            feedbackError = ''; // Limpar a mensagem de erro
         } catch (error) {
             feedbackError = 'Erro ao enviar feedback. Tente novamente.';
             console.error('Erro ao enviar feedback:', error);
@@ -65,6 +63,7 @@
         try {
             const response = await axios.get('http://localhost:5000/api/turmas');
             turmas = await Promise.all(response.data.map(async turma => {
+                // Buscar os nomes com base nos IDs
                 const cadeira = cadeiras.find(c => c.id === turma.id_cadeira);
                 const professor = professores.find(p => p.id === turma.id_professor);
                 const sala = salas.find(s => s.id === turma.id_sala);
@@ -73,28 +72,11 @@
                     ...turma,
                     nome_cadeira: cadeira ? cadeira.nome : 'Desconhecido',
                     nome_professor: professor ? professor.nome : 'Desconhecido',
-                    nome_sala: sala ? sala.nome : 'Desconhecido',
-                    alocacoes: []
+                    nome_sala: sala ? sala.nome : 'Desconhecido'
                 };
             }));
         } catch (error) {
             console.error('Erro ao carregar turmas:', error);
-        }
-    }
-
-    async function fetchAlocacoes() {
-        try {
-            const response = await axios.get('http://localhost:5000/api/alocacoes');
-            alocacoes = response.data;
-            turmas = turmas.map(turma => {
-                const alocacoesDaTurma = alocacoes.filter(alocacao => alocacao.id_turma === turma.id);
-                return {
-                    ...turma,
-                    alocacoes: alocacoesDaTurma.length > 0 ? alocacoesDaTurma : [] // Se não houver alocações, mantém o array vazio
-                };
-            });
-        } catch (error) {
-            console.error('Erro ao carregar alocações:', error);
         }
     }
 </script>
@@ -107,11 +89,6 @@
                 <div class="turma">
                     <p class="nome_disciplina">{turma.nome_cadeira} T{turma.n_turma}</p>
                     <p class="nome_sala">{turma.nome_sala}</p>
-                    {#if turma.alocacoes && turma.alocacoes.length > 0}
-                        {#each turma.alocacoes as alocacao}
-                            <p>{alocacao.horario} - {alocacao.dia}</p>
-                        {/each}
-                    {/if}
                 </div>
             {/if}
         {/each}
@@ -130,7 +107,7 @@
         {/if}
 
         <form on:submit|preventDefault={addFeedback}>
-            <textarea bind:value={feedback} placeholder="Escreva aqui seu feedback"></textarea>
+            <input bind:value={feedback} placeholder="Escreva aqui seu feedback">
             <button type='submit'>Enviar Feedback</button>
         </form>
     </div>
@@ -148,19 +125,18 @@
 
     #turmas {
         display: flex;
-        flex-wrap: wrap;
         gap: 5%;
     }
 
     .turma {
         background-color: #5A7302;
         color: white;
-        width: 30%;
+        width: 33%;
         border-radius: 10px;
         padding: 10px;
     }
 
-    textarea {
+    input {
         width: 100%;
         height: 100px;
         padding: 10px;
@@ -169,7 +145,12 @@
         border-style: none;
         background-color: #D9D9D9;
         border-radius: 20px;
-        resize: none;
+    }
+
+    input::placeholder {
+       position: relative;
+       color: #505050;
+       bottom: 30px
     }
     
     .success {

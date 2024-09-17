@@ -1,8 +1,9 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import func
 from flask_cors import CORS  # Importe o Flask-CORS
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, get_jwt
-
+from datetime import time,datetime,timedelta
 app = Flask(__name__)
 CORS(app)  # Habilite CORS para todas as rotas
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///university.db'
@@ -63,8 +64,9 @@ class Turma(db.Model):
 class Alocacao(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     id_turma = db.Column(db.Integer, db.ForeignKey('turma.id'), nullable=False)
-    dia = db.Column(db.String(50), nullable=False)
-    horario = db.Column(db.String(50), nullable=False)
+    dia = db.Column(db.Integer, nullable=False)
+    horario = db.Column(db.Time, nullable=False)
+    duracao = db.Column(db.Integer, nullable=False)
     turma = db.relationship('Turma', backref='alocacoes')
 
 class Feedback(db.Model):
@@ -72,9 +74,47 @@ class Feedback(db.Model):
     id_professor = db.Column(db.Integer, db.ForeignKey('professor.id'), nullable=False)
     feedback = db.Column(db.String(1000), nullable=False)
 
+class Login(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(50), nullable=False)
+    login = db.Column(db.String(50), nullable=False)
+    senha = db.Column(db.String(50), nullable=False)
+    role = db.Column(db.String(50), nullable=False)
+    id_professor = db.Column(db.Integer, db.ForeignKey('professor.id'))
+    professor = db.relationship('Professor', backref='Login')
+
+
+def inicializar_logins():
+    logins_existentes = db.session.query(Login).count()
+    if logins_existentes == 0:
+        coordenadores = [
+            Login(
+            nome = 'nome coordenador 1',
+            login = 'coordenador1',
+            senha = '123',
+            role = 'admin'
+            ),
+            Login(
+            nome = 'nome coordenador 2',
+            login = 'coordenador2',
+            senha = '123',
+            role = 'admin'
+            ),
+            Login(
+            nome = 'nome coordenador 2',
+            login = 'coordenador2',
+            senha = '123',
+            role = 'admin'
+            ),
+
+        ]
+        db.session.add_all(coordenadores)
+        db.session.commit()
+
 @app.before_request
 def create_tables():
     db.create_all()
+    inicializar_logins()
 
 @app.route('/api/cadeiras', methods=['POST'])
 def add_cadeira():
@@ -199,7 +239,28 @@ def add_professor():
     )
     db.session.add(novo_professor)
     db.session.commit()
-    return jsonify({'message': 'Professor adicionado com sucesso!'}), 201
+
+    nome_segmentado = data['nome'].split()
+    primeiro_nome = nome_segmentado[0]
+    iniciais = ''.join([part[0] for part in nome_segmentado[1:]]) if len(nome_segmentado) > 1 else ''
+    login_base = f"{primeiro_nome}{iniciais}"
+    login = login_base
+    counter = 1
+    while Login.query.filter_by(login=login).first() is not None:
+        login = f"{login_base}{counter}"
+        counter += 1
+
+    novo_login = Login(
+        nome = data['nome'],
+        login = login,
+        senha = '123',
+        role = 'user',
+        id_professor = novo_professor.id
+    )
+    db.session.add(novo_login)
+    db.session.commit()
+
+    return jsonify({'message': 'Professor adicionado com sucesso!','login': login}), 201
 
 @app.route('/api/professores', methods=['GET'])
 def get_professores():
@@ -215,23 +276,29 @@ def handle_professor(id):
         professor = Professor.query.get(id)
         if professor is None:
             return jsonify({'message': 'Professor não encontrado'}), 404
+        login = Login.query.filter_by(id_professor=id).first()
         return jsonify({
             'id': professor.id,
-            'nome': professor.nome
+            'nome': professor.nome,
+            'login': login.login
         })
     elif request.method == 'PUT':
         data = request.get_json()
         professor = Professor.query.get(id)
         if professor is None:
             return jsonify({'message': 'Professor não encontrado'}), 404
+        login = Login.query.filter_by(id_professor=id).first()
         professor.nome = data.get('nome', professor.nome)
+        login.login = data.get('login',login.login)
         db.session.commit()
         return jsonify({'message': 'Professor atualizado com sucesso!'})
     elif request.method == 'DELETE':
         professor = Professor.query.get(id)
         if professor is None:
             return jsonify({'message': 'Professor não encontrado'}), 404
+        login = Login.query.filter_by(id_professor=id).first()
         db.session.delete(professor)
+        db.session.delete(login)
         db.session.commit()
         return jsonify({'message': 'Professor deletado com sucesso!'})
 
@@ -300,14 +367,59 @@ def handle_turma(id):
         db.session.commit()
         return jsonify({'message': 'Turma deletada com sucesso!'})
 
+
+# rota consulta geral
+@app.route('/api/salasLivres', methods=['GET'])
+def handle_salas_livres():
+    agora = datetime.now()
+    dia_semana = agora.weekday()+1
+    hora_atual = agora.time()
+    salas = Sala.query.all()
+    salas_livres = []
+    for sala in salas:
+        turma_com_horario = Alocacao.query.join(Turma).filter(
+            Turma.id_sala == sala.id,
+            Alocacao.dia == dia_semana,
+            Alocacao.horario <= hora_atual,
+            (func.time(Alocacao.horario) + func.time(Alocacao.duracao * 3600)) > hora_atual
+        ).first()
+
+        if turma_com_horario:
+            continue
+        else:
+            proximo_horario = Alocacao.query.join(Turma).filter(
+                Turma.id_sala == sala.id,
+                Alocacao.dia == dia_semana,
+                Alocacao.horario > hora_atual
+            ).order_by(Alocacao.horario.asc()).first()
+
+            if proximo_horario:
+                hora_final = (datetime.combine(datetime.today(), proximo_horario.horario) + timedelta(hours=proximo_horario.duracao)).time()
+                salas_livres.append({
+                    'sala': sala.nome,
+                    'disponivel': hora_final.strftime('%H:%M:%S')
+                })
+            else:
+                salas_livres.append({
+                    'sala': sala.nome,
+                    'disponivel': 'até o fim do dia'
+                })
+    return jsonify({
+        'salas': salas_livres,
+    })
+
 # Routes for Alocacao
 @app.route('/api/alocacoes', methods=['POST'])
 def add_alocacao():
     data = request.get_json()
+    duracao = 2
+    if data['aulas_prolongadas']:
+        duracao = 4
     nova_alocacao = Alocacao(
         id_turma=data['id_turma'],
-        dia=data['dia'],
-        horario=data['horario']
+        dia=int(data['dia']),
+        horario=time(int(data['horario']),0),
+        duracao = duracao
     )
     db.session.add(nova_alocacao)
     db.session.commit()
@@ -320,7 +432,8 @@ def get_alocacoes():
         'id': alocacao.id,
         'id_turma': alocacao.id_turma,
         'dia': alocacao.dia,
-        'horario': alocacao.horario
+        'horario': alocacao.horario.hour,
+        'duracao' : alocacao.duracao
     } for alocacao in alocacoes])
 
 @app.route('/api/alocacoes/<int:id>', methods=['PUT','DELETE'])
@@ -331,6 +444,10 @@ def handle_alocacao(id):
         alocacao.id_turma = data.get('id_turma', alocacao.id_turma)
         alocacao.dia = data.get('dia', alocacao.dia)
         alocacao.horario = data.get('horario', alocacao.horario)
+        duracao = 2
+        if data.get('aulas_prolongadas'):
+            duracao = 4
+        alocacao.duracao = duracao
         db.session.commit()
         return jsonify({'message': 'Alocação atualizada com sucesso!'}), 200
     elif request.method == 'DELETE':
@@ -361,12 +478,6 @@ def get_feedbacks():
         'feedback': feedback.feedback
     } for feedback in feedbacks])
 
-#teste de login
-users = {
-    "coordenador": {"password": "123", "role": "admin"},
-    "professor": {"password": "123", "role": "user"},
-    "Liandro": {"password": "123", "role": "user"}
-}
 
 
 @app.route('/api/login', methods=['POST'])
@@ -374,12 +485,13 @@ def login():
     username = request.json.get('username')
     password = request.json.get('password')
 
-    user = users.get(username)
-    if not user or user['password'] != password:
+    user = Login.query.filter_by(login=username).first()
+    print(db.session.query(Login).count())
+    if not user or user.senha != password:
         return jsonify({"msg": "Bad username or password"}), 401
 
-    access_token = create_access_token(identity={"username": username, "role": user['role']})
-    return jsonify(access_token=access_token, role = user['role'])
+    access_token = create_access_token(identity={"username": username, "role": user.role})
+    return jsonify(access_token=access_token, role = user.role)
 
 @app.route('/api/protected', methods=['GET'])
 @jwt_required()

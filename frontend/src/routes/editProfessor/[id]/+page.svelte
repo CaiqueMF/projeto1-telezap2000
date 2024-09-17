@@ -6,7 +6,7 @@
   
     let id;
     let nome = '';
-  
+    let login = ''
     $: id = $page.params.id;
   
     onMount(async () => {
@@ -18,6 +18,7 @@
         const response = await axios.get(`http://localhost:5000/api/professores/${id}`);
         const professor = response.data;
         nome = professor.nome;
+        login = professor.login
       } catch (error) {
         console.error(error);
       }
@@ -26,7 +27,8 @@
     async function updateProfessor() {
       try {
         const updatedProfessor = {
-          nome
+          nome,
+          login
         };
         await axios.put(`http://localhost:5000/api/professores/${id}`, updatedProfessor);
         goto('/professores');
@@ -40,6 +42,7 @@
     <h1>Editar Cadeira</h1>
     <form on:submit|preventDefault={updateProfessor}>
         <input bind:value={nome} placeholder="Nome" required />
+        <input bind:value={login} placeholder="Login" required />
         <button type="submit">Atualizar</button>
     </form>
   </main>

@@ -78,7 +78,7 @@
         <option value="Eletiva">Eletiva</option>
 		    <option value="Optativa">Optativa</option>
 	    </select>
-      <select bind:value={semestre} required>
+      <select bind:value={semestre}>
         <option value="" disabled selected>Semestre</option>
         {#each Array(8).fill().map((_, i) => i + 1) as sem}
           <option value={sem}>{sem}</option>
@@ -87,8 +87,7 @@
       <input type="checkbox" bind:checked={aulas_prolongadas} /> Aulas prolongadas
       <select bind:value={curso} required>
         <option value="" disabled selected>Curso</option>
-        <option value="SMD Diurno">SMD Diurno</option>
-        <option value="SMD Noturno">SMD Noturno</option>
+        <option value="SMD">SMD</option>
         <option value="Tecnologia Educacional">Tecnologia Educacional</option>
       </select>
       <button type="submit">Atualizar</button>
