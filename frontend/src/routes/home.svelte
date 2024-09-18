@@ -16,7 +16,7 @@
         try {
             const response = await axios.get('http://localhost:5000/api/cadeiras');
             cadeiras = response.data;
-            resultados = [...resultados, ...cadeiras];  // Adiciona as cadeiras ao array de resultados
+            resultados = [...resultados, ...cadeiras];
         } catch (error) {
             console.error(error);
         }
@@ -26,7 +26,7 @@
         try {
             const response = await axios.get(`http://localhost:5000/api/salas`);
             salas = response.data;
-            resultados = [...resultados, ...salas];  // Adiciona as salas ao array de resultados
+            resultados = [...resultados, ...salas];
         } catch (error) {
             console.error(error);
         }

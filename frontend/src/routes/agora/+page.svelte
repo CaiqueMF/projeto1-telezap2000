@@ -22,7 +22,7 @@
     </h1>
     <p>Veja as salas disponíveis para você</p>
     {#each salas as sala}
-        <p>{sala.sala} livre até {sala.disponivel}</p>
+        <p>{sala.sala} livre {sala.disponivel}</p>
     {/each}
 </div>
 
