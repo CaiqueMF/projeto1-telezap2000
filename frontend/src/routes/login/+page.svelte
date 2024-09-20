@@ -22,7 +22,8 @@
         user.set({
           isAuthenticated: true,
           username: username,
-          role: data.role
+          role: data.role,
+          id_professor: data.id_professor
         });
         if (data.role == 'admin'){
             goto('/turmas');

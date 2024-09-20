@@ -15,17 +15,17 @@
   let turmas = [];
   let alocacoes = []; // Lista de alocações
   let dicionario_dia = {
-      "1":"segunda feira",
-      "2":"terça feira",
-      "3":"quarta feira",
-      "4":"quinta feira",
-      "5":"sexta feira",
-      "6":"sábado",
+      "1":"Segunda feira",
+      "2":"Terça feira",
+      "3":"Quarta feira",
+      "4":"Quinta feira",
+      "5":"Sexta feira",
+      "6":"Sábado",
     }
   onMount(async () => {
     await fetchOptions();
     await fetchTurmas();
-    await fetchAlocacoes(); // Chama a função para buscar alocações
+    await fetchAlocacoes();
   });
 
   async function fetchOptions() {
@@ -72,13 +72,11 @@
     try {
       const response = await axios.get('http://localhost:5000/api/alocacoes');
       alocacoes = response.data;
-
-      // Relacionar as alocações com as turmas
       turmas = turmas.map(turma => {
         const alocacoesDaTurma = alocacoes.filter(alocacao => alocacao.id_turma === turma.id);
         return {
           ...turma,
-          alocacoes: alocacoesDaTurma // Associa as alocações à turma correspondente
+          alocacoes: alocacoesDaTurma
         };
       });
     } catch (error) {
@@ -169,9 +167,9 @@
       <td>{turma.curso}</td>
       <td>
         {#if turma.alocacoes.length > 0}
-            {#each turma.alocacoes as alocacao}
-              <li>{dicionario_dia[alocacao.dia]} - {alocacao.horario}:00 à {alocacao.horario+alocacao.duracao}:00</li>
-            {/each}
+          {#each turma.alocacoes as alocacao}
+            {dicionario_dia[alocacao.dia]} - {alocacao.horario}:00 à {alocacao.horario+alocacao.duracao}:00
+          {/each}
         {:else}
           <span>Sem alocação</span>
         {/if}
@@ -196,10 +194,5 @@
 
   tr:nth-child(even) {
     background-color: #e0e0e0;
-  }
-
-  ul {
-    margin: 0;
-    padding-left: 20px;
   }
 </style>

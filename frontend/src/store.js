@@ -7,5 +7,6 @@ export const token = writable(null);
 export const user = writable({
   isAuthenticated: false,
   username: null,
-  role: null
+  role: null,
+  id_professor: null
 });
