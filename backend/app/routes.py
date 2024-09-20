@@ -1,122 +1,13 @@
-from flask import Flask, jsonify, request
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import func
-from flask_cors import CORS  # Importe o Flask-CORS
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, get_jwt
+from flask import Blueprint, jsonify, request
+from .models import Cadeira, Sala, Professor, Turma, Alocacao, Login,Feedback, db
 from datetime import time,datetime,timedelta
-app = Flask(__name__)
-CORS(app)  # Habilite CORS para todas as rotas
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///university.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['JWT_SECRET_KEY'] = 'senha_mudar_depois'
-jwt = JWTManager(app)
+from . import jwt,blacklist
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
 
-db = SQLAlchemy(app)
-
-blacklist = set()
-
-# Models definition
-professor_cadeira = db.Table('professor_cadeira',
-    db.Column('professor_id', db.Integer, db.ForeignKey('professor.id')),
-    db.Column('cadeira_id', db.Integer, db.ForeignKey('cadeira.id'))
-)
-
-cadeira_prerequisito = db.Table('cadeira_prerequisito',
-    db.Column('cadeira_id', db.Integer, db.ForeignKey('cadeira.id')),
-    db.Column('prerequisito_id', db.Integer, db.ForeignKey('cadeira.id'))
-)
-
-class Cadeira(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    nome = db.Column(db.String(100), nullable=False)
-    professores = db.relationship('Professor', secondary=professor_cadeira, backref='cadeiras')
-    prerrequisitos = db.relationship('Cadeira', secondary=cadeira_prerequisito,
-                                     primaryjoin=(id == cadeira_prerequisito.c.cadeira_id),
-                                     secondaryjoin=(id == cadeira_prerequisito.c.prerequisito_id),
-                                     backref='prerequisitada_por')
-    necessidades_sala = db.Column(db.String(100))
-    natureza = db.Column(db.String(16))
-    semestre = db.Column(db.Integer)
-    aulas_prolongadas = db.Column(db.Boolean, default=False)
-    curso = db.Column(db.String(100))
-
-class Sala(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    nome = db.Column(db.String(100), nullable=False)
-    tipos = db.Column(db.String(100))
-
-class Professor(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    nome = db.Column(db.String(100), nullable=False)
-
-class Turma(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    id_cadeira = db.Column(db.Integer, db.ForeignKey('cadeira.id'), nullable=False)
-    id_professor = db.Column(db.Integer, db.ForeignKey('professor.id'), nullable=False)
-    id_sala = db.Column(db.Integer, db.ForeignKey('sala.id'), nullable=False)
-    n_turma = db.Column(db.Integer, nullable=False)
-    n_vagas = db.Column(db.Integer, nullable=False)
-    curso = db.Column(db.String(100), nullable=False)
-    cadeira = db.relationship('Cadeira', backref='turmas')
-    professor = db.relationship('Professor', backref='turmas')
-    sala = db.relationship('Sala', backref='turmas')
-
-class Alocacao(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    id_turma = db.Column(db.Integer, db.ForeignKey('turma.id'), nullable=False)
-    dia = db.Column(db.Integer, nullable=False)
-    horario = db.Column(db.Time, nullable=False)
-    duracao = db.Column(db.Integer, nullable=False)
-    turma = db.relationship('Turma', backref='alocacoes')
-
-class Feedback(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    id_professor = db.Column(db.Integer, db.ForeignKey('professor.id'), nullable=False)
-    feedback = db.Column(db.String(1000), nullable=False)
-
-class Login(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    nome = db.Column(db.String(50), nullable=False)
-    login = db.Column(db.String(50), nullable=False)
-    senha = db.Column(db.String(50), nullable=False)
-    role = db.Column(db.String(50), nullable=False)
-    id_professor = db.Column(db.Integer, db.ForeignKey('professor.id'))
-    professor = db.relationship('Professor', backref='Login')
+main = Blueprint('main', __name__)
 
 
-def inicializar_logins():
-    logins_existentes = db.session.query(Login).count()
-    if logins_existentes == 0:
-        coordenadores = [
-            Login(
-            nome = 'nome coordenador 1',
-            login = 'coordenador1',
-            senha = '123',
-            role = 'admin'
-            ),
-            Login(
-            nome = 'nome coordenador 2',
-            login = 'coordenador2',
-            senha = '123',
-            role = 'admin'
-            ),
-            Login(
-            nome = 'nome coordenador 2',
-            login = 'coordenador2',
-            senha = '123',
-            role = 'admin'
-            ),
-
-        ]
-        db.session.add_all(coordenadores)
-        db.session.commit()
-
-@app.before_request
-def create_tables():
-    db.create_all()
-    inicializar_logins()
-
-@app.route('/api/cadeiras', methods=['POST'])
+@main.route('/api/cadeiras', methods=['POST'])
 def add_cadeira():
     data = request.get_json()
     nova_cadeira = Cadeira(
@@ -131,7 +22,7 @@ def add_cadeira():
     db.session.commit()
     return jsonify({'message': 'Cadeira adicionada com sucesso!'}), 201
 
-@app.route('/api/cadeiras', methods=['GET'])
+@main.route('/api/cadeiras', methods=['GET'])
 def get_cadeiras():
     cadeiras = Cadeira.query.all()
     return jsonify([{
@@ -144,7 +35,7 @@ def get_cadeiras():
         'curso': cadeira.curso
     } for cadeira in cadeiras])
 
-@app.route('/api/cadeiras/<int:id>', methods=['GET', 'PUT', 'DELETE'])
+@main.route('/api/cadeiras/<int:id>', methods=['GET', 'PUT', 'DELETE'])
 def handle_cadeira(id):
     if request.method == 'GET':
         cadeira = Cadeira.query.get(id)
@@ -182,7 +73,7 @@ def handle_cadeira(id):
 
 
 # Routes for Sala
-@app.route('/api/salas', methods=['POST'])
+@main.route('/api/salas', methods=['POST'])
 def add_sala():
     data = request.get_json()
     nova_sala = Sala(
@@ -193,7 +84,7 @@ def add_sala():
     db.session.commit()
     return jsonify({'message': 'Sala adicionada com sucesso!'}), 201
 
-@app.route('/api/salas', methods=['GET'])
+@main.route('/api/salas', methods=['GET'])
 def get_salas():
     salas = Sala.query.all()
     return jsonify([{
@@ -202,7 +93,7 @@ def get_salas():
         'tipos': sala.tipos
     } for sala in salas])
 
-@app.route('/api/salas/<int:id>', methods=['GET', 'PUT', 'DELETE'])
+@main.route('/api/salas/<int:id>', methods=['GET', 'PUT', 'DELETE'])
 def handle_sala(id):
     if request.method == 'GET':
         sala = Sala.query.get(id)
@@ -231,7 +122,7 @@ def handle_sala(id):
         return jsonify({'message': 'Sala deletada com sucesso!'})
 
 # Routes for Professor
-@app.route('/api/professores', methods=['POST'])
+@main.route('/api/professores', methods=['POST'])
 def add_professor():
     data = request.get_json()
     novo_professor = Professor(
@@ -262,7 +153,7 @@ def add_professor():
 
     return jsonify({'message': 'Professor adicionado com sucesso!','login': login}), 201
 
-@app.route('/api/professores', methods=['GET'])
+@main.route('/api/professores', methods=['GET'])
 def get_professores():
     professores = Professor.query.all()
     return jsonify([{
@@ -270,7 +161,7 @@ def get_professores():
         'nome': professor.nome
     } for professor in professores])
 
-@app.route('/api/professores/<int:id>', methods=['GET', 'PUT', 'DELETE'])
+@main.route('/api/professores/<int:id>', methods=['GET', 'PUT', 'DELETE'])
 def handle_professor(id):
     if request.method == 'GET':
         professor = Professor.query.get(id)
@@ -303,7 +194,7 @@ def handle_professor(id):
         return jsonify({'message': 'Professor deletado com sucesso!'})
 
 # Routes for Turma
-@app.route('/api/turmas', methods=['POST'])
+@main.route('/api/turmas', methods=['POST'])
 def add_turma():
     data = request.get_json()
     nova_turma = Turma(
@@ -318,7 +209,7 @@ def add_turma():
     db.session.commit()
     return jsonify({'message': 'Turma adicionada com sucesso!'}), 201
 
-@app.route('/api/turmas', methods=['GET'])
+@main.route('/api/turmas', methods=['GET'])
 def get_turmas():
     turmas = Turma.query.all()
     return jsonify([{
@@ -331,7 +222,7 @@ def get_turmas():
         'curso': turma.curso
     } for turma in turmas])
 
-@app.route('/api/turmas/<int:id>', methods=['GET', 'PUT', 'DELETE'])
+@main.route('/api/turmas/<int:id>', methods=['GET', 'PUT', 'DELETE'])
 def handle_turma(id):
     if request.method == 'GET':
         turma = Turma.query.get(id)
@@ -369,45 +260,90 @@ def handle_turma(id):
 
 
 # rota consulta geral
-@app.route('/api/salasLivres', methods=['GET'])
+@main.route('/api/salasLivres', methods=['GET'])
 def handle_salas_livres():
     agora = datetime.now()
-    dia_semana = agora.weekday()+1
+    dia_semana = agora.weekday() + 1
     hora_atual = agora.time()
     salas = Sala.query.all()
     salas_livres = []
+
     for sala in salas:
         turma_com_horario = Alocacao.query.join(Turma).filter(
             Turma.id_sala == sala.id,
             Alocacao.dia == dia_semana,
-            Alocacao.horario <= hora_atual,
-            (func.time(Alocacao.horario) + func.time(Alocacao.duracao)) > hora_atual
+            Alocacao.horario <= hora_atual
         ).first()
-        if turma_com_horario:
-            continue
-        else:
-            proximo_horario = Alocacao.query.join(Turma).filter(
-                Turma.id_sala == sala.id,
-                Alocacao.dia == dia_semana,
-                Alocacao.horario > hora_atual
-            ).order_by(Alocacao.horario.asc()).first()
 
-            if proximo_horario:
-                salas_livres.append({
-                    'sala': sala.nome,
-                    'disponivel': proximo_horario.horario.strftime('%H:%M:%S')
-                })
-            else:
-                salas_livres.append({
-                    'sala': sala.nome,
-                    'disponivel': 'até o fim do dia'
-                })
+        if turma_com_horario:
+            # Extraindo o horário e duração para fazer a comparação corretamente
+            horario_inicio = turma_com_horario.horario
+            duracao = turma_com_horario.duracao
+            horario_fim = (datetime.combine(agora.date(), horario_inicio) + timedelta(hours=duracao)).time()
+
+            if horario_fim > hora_atual:
+                continue
+
+        proximo_horario = Alocacao.query.join(Turma).filter(
+            Turma.id_sala == sala.id,
+            Alocacao.dia == dia_semana,
+            Alocacao.horario > hora_atual
+        ).order_by(Alocacao.horario.asc()).first()
+
+        if proximo_horario:
+            salas_livres.append({
+                'sala': sala.nome,
+                'disponivel': proximo_horario.horario.strftime('%H:%M:%S')
+            })
+        else:
+            salas_livres.append({
+                'sala': sala.nome,
+                'disponivel': 'até o fim do dia'
+            })
+
+    return jsonify({'salas': salas_livres})
+
+
+@main.route('/api/salasOcupadasAgora', methods=['GET'])
+def handle_salas_ocupadas_agora():
+    agora = datetime.now()
+    dia_semana = agora.weekday() + 1
+    hora_atual = agora.time()
+    salas_ocupadas = []
+
+    # Busca por aulas que estão acontecendo agora
+    alocacoes_ocupadas = Alocacao.query.join(Turma).join(Sala).filter(
+        Alocacao.dia == dia_semana,
+        Alocacao.horario <= hora_atual
+    ).all()
+
+    # Monta a lista de salas ocupadas com as informações da aula
+    for alocacao in alocacoes_ocupadas:
+        sala = alocacao.turma.sala
+        cadeira = alocacao.turma.cadeira
+
+        # Extraindo valores específicos de `alocacao`
+        horario_inicio = alocacao.horario
+        duracao = alocacao.duracao  # Certifique-se de que `duracao` é um número, como inteiro ou float
+
+        # Cálculo do horário de término da aula
+        horario_termino = (datetime.combine(agora.date(), horario_inicio) + timedelta(hours=float(duracao))).time()
+
+        # Verifica se a aula ainda está em andamento
+        if horario_termino > hora_atual:
+            salas_ocupadas.append({
+                'sala': sala.nome,
+                'cadeira': cadeira.nome,
+                'horario_inicio': horario_inicio.strftime('%H:%M:%S'),
+                'horario_termino': horario_termino.strftime('%H:%M:%S')
+            })
+
     return jsonify({
-        'salas': salas_livres,
+        'salas_ocupadas': salas_ocupadas,
     })
 
 # Routes for Alocacao
-@app.route('/api/alocacoes', methods=['POST'])
+@main.route('/api/alocacoes', methods=['POST'])
 def add_alocacao():
     data = request.get_json()
     duracao = 2
@@ -423,7 +359,7 @@ def add_alocacao():
     db.session.commit()
     return jsonify({'message': 'Alocação adicionada com sucesso!'}), 201
 
-@app.route('/api/alocacoes', methods=['GET'])
+@main.route('/api/alocacoes', methods=['GET'])
 def get_alocacoes():
     alocacoes = Alocacao.query.all()
     return jsonify([{
@@ -434,7 +370,7 @@ def get_alocacoes():
         'duracao' : alocacao.duracao
     } for alocacao in alocacoes])
 
-@app.route('/api/alocacoes/<int:id>', methods=['PUT','DELETE'])
+@main.route('/api/alocacoes/<int:id>', methods=['PUT','DELETE'])
 def handle_alocacao(id):
     if request.method == 'PUT':
         data = request.get_json()
@@ -457,7 +393,7 @@ def handle_alocacao(id):
         db.session.commit()
         return jsonify({'message': 'Alocação deletada com sucesso!'})
 
-@app.route('/api/feedbacks', methods=['POST'])
+@main.route('/api/feedbacks', methods=['POST'])
 def add_feedback():
     data = request.get_json()
     novo_feedback = Feedback(
@@ -468,7 +404,7 @@ def add_feedback():
     db.session.commit()
     return jsonify({'message': 'Feedback adicionada com sucesso!'}), 201
 
-@app.route('/api/feedbacks', methods=['GET'])
+@main.route('/api/feedbacks', methods=['GET'])
 def get_feedbacks():
     feedbacks = Feedback.query.all()
     return jsonify([{
@@ -479,7 +415,7 @@ def get_feedbacks():
 
 
 
-@app.route('/api/login', methods=['POST'])
+@main.route('/api/login', methods=['POST'])
 def login():
     username = request.json.get('username')
     password = request.json.get('password')
@@ -492,13 +428,13 @@ def login():
     access_token = create_access_token(identity={"username": username, "role": user.role})
     return jsonify(access_token=access_token, role = user.role)
 
-@app.route('/api/protected', methods=['GET'])
+@main.route('/api/protected', methods=['GET'])
 @jwt_required()
 def protected():
     current_user = get_jwt_identity()
     return jsonify(logged_in_as=current_user), 200
 
-@app.route('/api/logout', methods=['POST'])
+@main.route('/api/logout', methods=['POST'])
 @jwt_required()
 def logout():
     jti = get_jwt()["jti"]  # JWT ID (jti) é um identificador único para o token JWT
@@ -510,6 +446,3 @@ def logout():
 def check_if_token_in_blacklist(jwt_header, jwt_payload):
     jti = jwt_payload["jti"]
     return jti in blacklist
-
-if __name__ == '__main__':
-    app.run(debug=True)
