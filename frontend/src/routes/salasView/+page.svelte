@@ -65,12 +65,6 @@
 </main>
 
 <style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-
     main {
         height: 100%;
         width: 100%;
@@ -98,6 +92,7 @@
         width: 90%;
         height: 80%;
         margin-top: 5%;
+        background-color: white;
     }
 
     .square div {
@@ -139,11 +134,11 @@
     }
 
     .salaSquare p {
-        margin: 0; /* Remove margens dos parágrafos */
+        margin: 0;
         font-weight: 400;
     }
 
     .tipo {
         font-size: 1rem;
     }
-</style>
+    </style>

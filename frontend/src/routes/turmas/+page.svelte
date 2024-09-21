@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import axios from 'axios';
+  import NavigationCoordenador from '../navigationCoordenador.svelte';
 
   let id_cadeira = '';
   let id_professor = '';

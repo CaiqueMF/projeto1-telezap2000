@@ -26,20 +26,6 @@
 				<a href="/professor">Professor</a>
 			</li>
 			{/if}
-			{#if currentUser == "admin"}
-			<li aria-current={$page.url.pathname === '/cadeiras' ? 'page' : undefined}>
-				<a href="/cadeiras">Disciplinas</a>
-			</li>
-			<li aria-current={$page.url.pathname === '/professores' ? 'page' : undefined}>
-				<a href="/professores">Professores</a>
-			</li>
-			<li aria-current={$page.url.pathname === '/salas' ? 'page' : undefined}>
-				<a href="/salas">Salas (Edição)</a>
-			</li>
-			<li aria-current={$page.url.pathname === '/turmas' ? 'page' : undefined}>
-				<a href="/turmas">Turmas</a>
-			</li>
-			{/if}
 			{#if currentUser == null}
 			<li aria-current={$page.url.pathname === '/login' ? 'page' : undefined} class="login">
 				<a href="/login">Login Administrador</a> <i class="fa-regular fa-circle-user"></i>

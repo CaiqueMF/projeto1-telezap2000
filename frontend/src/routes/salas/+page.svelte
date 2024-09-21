@@ -1,10 +1,13 @@
 <script>
     import { onMount } from 'svelte';
     import axios from 'axios';
+    import NavigationCoordenador from '../navigationCoordenador.svelte';
+
     let nome = ''
     let tipos = ''
     let salas = [];
     let pesquisaNome = ""
+    
     onMount(async () => {
 	    await fetchSala();
 	});

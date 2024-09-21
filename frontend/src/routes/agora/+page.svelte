@@ -47,10 +47,10 @@
 
 <style>
   .livre, .ocupado {
-    border: 1px black solid;
     padding: 10px;
     padding-left: 150px;
     padding-right: 50px;
+    background-color: white;
   }
 
   h1 {
@@ -84,7 +84,6 @@
     border-radius: 5px;
   }
 
-  /* Salas ocupadas em linhas de 5 */
   .salas-container-ocupadas {
     display: flex;
     flex-wrap: wrap;

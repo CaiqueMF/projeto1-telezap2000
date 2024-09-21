@@ -10,6 +10,10 @@
 	box-sizing: border-box;
 }
 
+html {
+	background-color: #CECECE;
+}
+
 h1 {
 	font-family: "Alata", system-ui;
 	color: black;
@@ -18,7 +22,7 @@ h1 {
 p {
 	font-family: "Outfit", sans-serif;
 	font-size: 20px;
-	font-weight: 700;
+	font-weight: 400;
 	line-height: 1.5;
 }
 
