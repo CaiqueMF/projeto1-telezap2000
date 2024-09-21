@@ -58,7 +58,7 @@
     }
 
     h1 {
-        font-family: 'Times New Roman', Times, serif;
+        font-family: 'Playfair Display', Times, serif;
         font-size: 90px;
         font-weight: 400;
         padding-top: 10%;

@@ -49,7 +49,15 @@
 	  }
 	}
 </script>
-  
+
+<main>
+	<div class="btns">
+		<button>Disciplinas</button>
+		<button>Turmas</button>
+		<button>Professores</button>
+		<button>Salas</button>
+	</div>
+</main>
 <input type="text" bind:value={pesquisaNome} placeholder="Buscar disciplina">
 <input type="text" bind:value={pesquisaSemestre} placeholder="Buscar semestre">
 <p>Quantidade total de disciplinas: {cadeiras.length}</p>

@@ -26,7 +26,7 @@
           id_professor: data.id_professor
         });
         if (data.role == 'admin'){
-            goto('/turmas');
+            goto('/cadeiras');
         } else {
             goto('/professor')
         }
@@ -38,7 +38,7 @@
         const currentUser = $user;
         if (currentUser.isAuthenticated) {
             if (currentUser.role === 'admin') {
-                goto('/turmas');
+                goto('/cadeiras');
             } else {
                 goto('/professor');
             }

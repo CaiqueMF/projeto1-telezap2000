@@ -98,6 +98,7 @@ nav a {
 	font-size: 1rem;
 	letter-spacing: 0.1em;
 	transition: color 0.2s linear;
+	font-family: "Outfit";
 }
 
 .login {

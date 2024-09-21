@@ -42,9 +42,9 @@
       <option value="" disabled selected>Tipo de sala</option>
       <option value="Sala normal">Sala normal</option>
       <option value="Sala grande">Sala grande</option>
-      <option value="Atelie">Ateliê</option>
-      <option value="Laboratorio basico">Laboratório básico</option>
-      <option value="Laboratorio avançado">Laboratório avançado</option>
+      <option value="Ateliê">Ateliê</option>
+      <option value="Laboratório básico">Laboratório básico</option>
+      <option value="Laboratório avançado">Laboratório avançado</option>
     </select>
     <button type="submit">Adicionar</button>
   </form>
