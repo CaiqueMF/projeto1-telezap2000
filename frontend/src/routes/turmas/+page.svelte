@@ -19,7 +19,7 @@
   let professores = [];
   let salas = [];
   let turmas = [];
-  let alocacoes = []; // Lista de alocações
+  let alocacoes = [];
   let dicionario_dia = {
       "1":"Segunda feira",
       "2":"Terça feira",
@@ -36,6 +36,7 @@
 
   function changeMode() {
 		addMode = 1;
+    editSalaById = null
 	}
 
   async function fetchOptions() {
@@ -130,10 +131,10 @@
 			await axios.post('http://localhost:5000/api/alocacoes', newAlocacao);
 			dia = ''
       horario = ''
-      fetchOptions();
 	  	} catch (error) {
 			console.error(error);
 	  }
+    fetchAlocacoes()
 	}
 
   async function updateTurma(turma_id) {
@@ -154,6 +155,7 @@
       }
       editSalaById = null
       fetchTurmas()
+      fetchOptions()
     }
 
     async function updateMode(turma_id) {
@@ -170,6 +172,44 @@
     } catch (error) {
         console.error(error);
     }
+    addMode = 0;
+    }
+
+    async function deleteTurma(turma_id) {
+      try {
+        await axios.delete(`http://localhost:5000/api/turmas/${turma_id}`)
+        goto('/turmas');
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    async function deleteAlocacao(id_alocacao) {
+      try {
+        await axios.delete(`http://localhost:5000/api/alocacoes/${id_alocacao}`)
+      } catch (error) {
+        console.error(error);
+      }
+      fetchOptions()
+      fetchAlocacoes()
+      fetchTurmas()
+    }
+
+    async function updateAlocacao(id_alocacao) {
+      try {
+        const updatedAlocacao = {
+          id_turma: id,
+		  	  dia,
+		  	  horario,
+          aulas_prolongadas
+        }
+        await axios.put(`http://localhost:5000/api/alocacoes/${id_alocacao}`, updatedAlocacao)
+    } catch (error) {
+        console.error(error);
+      }
+      fetchOptions();
+      fetchAlocacoes()
+      fetchTurmas()
     }
 </script>
 
@@ -240,70 +280,90 @@
     {/if}
     {#each turmas as turma (turma.id)}
     {#if turma.id == editSalaById}
-    <td>
-      <select bind:value={id_cadeira} on:change={() => {
-      curso = cadeiras[id_cadeira - 1].curso}} required>
-      <option value="" disabled selected>Selecione a Disciplina</option>
-      {#each cadeiras as cadeira}
-        <option value={cadeira.id}>{cadeira.nome}</option>
-      {/each}
-    </select>
-  </td>
-    <td>
-      <select bind:value={id_professor} required>
-        <option value="" disabled selected>Selecione o Professor</option>
-        {#each professores as professor}
-          <option value={professor.id}>{professor.nome}</option>
+    <tr>
+      <td>
+        <select bind:value={id_cadeira} on:change={() => {
+        curso = cadeiras[id_cadeira - 1].curso}} required>
+        <option value="" disabled selected>Selecione a Disciplina</option>
+        {#each cadeiras as cadeira}
+          <option value={cadeira.id}>{cadeira.nome}</option>
         {/each}
       </select>
     </td>
-    <td>
-      <select bind:value={id_sala} required>
-        <option value="" disabled selected>Selecione a Sala</option>
-        {#each salas as sala}
-          <option value={sala.id}>{sala.nome}</option>
-        {/each}
-      </select>
-    </td>
-    <td>
-      <input bind:value={n_turma} placeholder="Número da Turma" required />
-    </td>
-    <td>
-      <input bind:value={n_vagas} placeholder="Vagas" required />
-    </td>
-    <td>
-      <select bind:value={curso} required>
-        <option value="" disabled selected>Curso</option>
-        <option value="SMD Diurno">SMD Diurno</option>
-        <option value="SMD Noturno">SMD Noturno</option>
-        <option value="Tecnologia Educacional">Tecnologia Educacional</option>
-      </select>
-    </td>
-    <td>
-      <select bind:value={dia}>
-        <option value="1">Segunda-feira</option>
-        <option value="2">Terça-feira</option>
-        <option value="3">Quarta-feira</option>
-        <option value="4">Quinta-feira</option>
-        <option value="5">Sexta-feira</option>
-        <option value="6">Sábado</option>
-      </select>
-      <select bind:value={horario}>
-        <option value="8">8:00</option>
-        <option value="10">10:00</option>
-        <option value="14">14:00</option>
-        <option value="16">16:00</option>
-        <option value="18">18:00</option>
-        <option value="20">20:00</option>
-      </select>
-      <input type="checkbox" bind:checked={aulas_prolongadas} /> Aulas prolongadas
-      <button on:click={addAlocacao(turma.id)}>adicionar horário</button>
-    </td>
-    <td>
-      <button on:click={() => {
-        updateTurma(turma.id)
-        }}><i class="fa-solid fa-check"></i></button>
-    </td>
+      <td>
+        <select bind:value={id_professor} required>
+          <option value="" disabled selected>Selecione o Professor</option>
+          {#each professores as professor}
+            <option value={professor.id}>{professor.nome}</option>
+          {/each}
+        </select>
+      </td>
+      <td>
+        <select bind:value={id_sala} required>
+          <option value="" disabled selected>Selecione a Sala</option>
+          {#each salas as sala}
+            <option value={sala.id}>{sala.nome}</option>
+          {/each}
+        </select>
+      </td>
+      <td>
+        <input bind:value={n_turma} placeholder="Número da Turma" required />
+      </td>
+      <td>
+        <input bind:value={n_vagas} placeholder="Vagas" required />
+      </td>
+      <td>
+        <select bind:value={curso} required>
+          <option value="" disabled selected>Curso</option>
+          <option value="SMD Diurno">SMD Diurno</option>
+          <option value="SMD Noturno">SMD Noturno</option>
+          <option value="Tecnologia Educacional">Tecnologia Educacional</option>
+        </select>
+      </td>
+      <td>
+        <div class="inputsAlocacao">
+          <select bind:value={dia}>
+            <option value="1">Segunda-feira</option>
+            <option value="2">Terça-feira</option>
+            <option value="3">Quarta-feira</option>
+            <option value="4">Quinta-feira</option>
+            <option value="5">Sexta-feira</option>
+            <option value="6">Sábado</option>
+          </select>
+          <select bind:value={horario}>
+            <option value="8">8:00</option>
+            <option value="10">10:00</option>
+            <option value="14">14:00</option>
+            <option value="16">16:00</option>
+            <option value="18">18:00</option>
+            <option value="20">20:00</option>
+          </select>
+        </div>
+        <div class="inputsAlocacao">
+          <input type="checkbox" bind:checked={aulas_prolongadas} /> 
+          <p>Aulas prolongadas</p>
+          <button on:click={addAlocacao(turma.id)}><i class="fa-solid fa-plus"></i></button>
+        </div>
+        {#if turma.alocacoes.length > 0}
+        <ul>
+          {#each turma.alocacoes as alocacao}
+          <li>{dicionario_dia[alocacao.dia]} - {alocacao.horario}:00
+            <button on:click={updateAlocacao(alocacao.id)}><i class="fa-solid fa-check"></i></button>
+            <button on:click={deleteAlocacao(alocacao.id)}><i class="fa-solid fa-trash"></i></button>
+          </li>
+          {/each}
+        </ul>
+          {/if}
+      </td>
+      <td>
+        <button on:click={() => {
+          updateTurma(turma.id)
+          }}><i class="fa-solid fa-check"></i></button>
+          <button on:click={deleteTurma(turma.id)}>
+            <i class="fa-solid fa-trash"></i>
+          </button>
+      </td>
+    </tr>
     {:else}
     <tr>
       <td>{turma.nome_cadeira}</td>
@@ -314,9 +374,11 @@
       <td>{turma.curso}</td>
       <td>
         {#if turma.alocacoes.length > 0}
+        <ul>
           {#each turma.alocacoes as alocacao}
-            {dicionario_dia[alocacao.dia]} - {alocacao.horario}:00 à {alocacao.horario+alocacao.duracao}:00
+            <li>{dicionario_dia[alocacao.dia]} - {alocacao.horario}:00 à {alocacao.horario+alocacao.duracao}:00</li>
           {/each}
+        </ul>
         {:else}
           <span>Sem alocação</span>
         {/if}
@@ -338,7 +400,12 @@
 		padding: 0 10%;
 		font-family: 'Outfit';
 		font-weight: 400;
+    font-size: 16px;
 	}
+
+  ul {
+    list-style: none;
+  }
 
   h1 {
 		font-family: "Playfair Display";
@@ -392,11 +459,33 @@
     color: white;
   }
 
+  .inputsAlocacao {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+  }
+
+  .inputsAlocacao input {
+    width: 5%;
+  }
+
+  .inputsAlocacao p {
+    font-size: 16px;
+  }
+
   table {
-	  	font-family: arial, sans-serif;
+	  	font-family: "Outfit", sans-serif;
 	  	border-collapse: collapse;
 	  	width: 100%;
 	}
+
+  table input, table select {
+    background-color: #D9D9D9;
+		width: 100%;
+		border-style: none;
+		border-radius: 10px;
+		padding: 5px;
+  }
 	
 	td, th {
 	  	text-align: left;
