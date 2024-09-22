@@ -4,13 +4,24 @@
 	import { token, user } from '../../store';
 
 	$: currentUser = $user.id_professor;
+    $: currentName = $user.nome;
 
+    let currentUsername = $user.username;
+    let senha = ''
     let cadeiras = [];
     let professores = [];
     let salas = [];
     let turmas = [];
     let alocacoes = []
 
+    let dicionario_dia = {
+      "1":"Segunda feira",
+      "2":"Terça feira",
+      "3":"Quarta feira",
+      "4":"Quinta feira",
+      "5":"Sexta feira",
+      "6":"Sábado",
+    }
     let feedback = '';
     let feedbackSuccess = ''; // Mensagem de sucesso no envio do feedback
     let feedbackError = ''; // Mensagem de erro no envio do feedback
@@ -19,7 +30,6 @@
         await fetchOptions();
         await fetchTurmas();
         await fetchAlocacoes();
-        console.log(currentUser)
     });
 
     async function fetchOptions() {
@@ -96,100 +106,234 @@
             console.error('Erro ao carregar alocações:', error);
         }
     }
+
+    async function atualizarLogin() {
+        try{
+            const response = await axios.put(`http://localhost:5000/api/update_login`,{
+
+                login_novo: currentUsername,
+                login_antigo: $user.username,
+            })
+            console.log(response.data.message)
+        }catch(error){
+            console.error('erro ao atualizar login:', error.response.data.message)
+        }
+    }
+
+    async function atualizarSenha() {
+        try{
+            const response = await axios.put(`http://localhost:5000/api/update_password`,{
+                senha: senha,
+                login: $user.username,
+            })
+            console.log(response.data.message)
+            senha = ''
+        }catch(error){
+            console.error('erro ao atualizar senha:', error.response.data.message)
+        }
+    }
 </script>
 
 <main>
-    <h1>Minhas Turmas</h1>
-    <div id="turmas">
-        {#each turmas as turma}
-            {#if turma.id_professor == currentUser}
-                <div class="turma">
-                    <p class="nome_disciplina">{turma.nome_cadeira} T{turma.n_turma}</p>
-                    <p class="nome_sala">{turma.nome_sala}</p>
-                    {#if turma.alocacoes && turma.alocacoes.length > 0}
-                        {#each turma.alocacoes as alocacao}
-                            <p>{alocacao.horario} - {alocacao.dia}</p>
-                        {/each}
-                    {/if}
-                </div>
-            {/if}
-        {/each}
-    </div>
-
-    <div id="feedback">
-        <h2>Enviar feedback</h2>
-        <p>Envie alguma sugestão para os coordenadores de como melhorar os horários das suas disciplinas</p>
+    <div class="content">
+        <div id="turmas">
+            <h1>Minhas Disciplinas</h1>
+            <p>Aqui estão todas as suas disciplinas</p>
+            <div class="gridCointainer">
+                {#each turmas as turma}
+                {#if turma.id_professor == currentUser}
+                    <div class="turma">
+                        <p class="nome_disciplina">{turma.nome_cadeira} T{turma.n_turma}</p>
+                        <p class="nome_sala">{turma.nome_sala}</p>
+                        {#if turma.alocacoes && turma.alocacoes.length > 0}
+                            {#each turma.alocacoes as alocacao}
+                                <p>{dicionario_dia[alocacao.dia]} - {alocacao.horario}:00 à {alocacao.horario+alocacao.duracao}:00</p>
+                            {/each}
+                        {/if}
+                    </div>
+                {/if}
+            {/each}
+            </div> 
+        </div>
+        <div class="horizontal">
+            <div id="feedback">
+                <h2>Enviar feedback</h2>
+                <p>Envie alguma sugestão para os coordenadores de como melhorar os horários da suas disciplinas</p>
+                
+                {#if feedbackSuccess}
+                    <p class="success">{feedbackSuccess}</p>
+                {/if}
         
-        {#if feedbackSuccess}
-            <p class="success">{feedbackSuccess}</p>
-        {/if}
-
-        {#if feedbackError}
-            <p class="error">{feedbackError}</p>
-        {/if}
-
-        <form on:submit|preventDefault={addFeedback}>
-            <input bind:value={feedback} placeholder="Escreva aqui seu feedback">
-            <button type='submit'>Enviar Feedback</button>
-        </form>
+                {#if feedbackError}
+                    <p class="error">{feedbackError}</p>
+                {/if}
+        
+                <form on:submit|preventDefault={addFeedback}>
+                    <textarea
+                    class="feedbackInput"
+                    bind:value={feedback}
+                    placeholder="Escreva aqui seu feedback"
+                    ></textarea>
+                    <button class="feedbackButton" type='submit'>Enviar Feedback</button>
+                </form>
+            </div>
+        
+            <div id="conta">
+                <h2>Conta</h2>
+                <p>Aqui estão todos os dados da sua conta no Fada</p>
+                <div class="nomeProfessor">
+                    <img src="account_circle.png" alt="ícone perfil">
+                    <p>{currentName}</p>
+                </div>
+                <div class="horizontal">
+                    <div class="usuarioESenha">
+                        <div>
+                            <p>Usuário</p>
+                            <button on:click={()=>{atualizarLogin()}}><img src="pen.png" alt="atulizar usuário"></button>
+                        </div>
+                        <input bind:value={currentUsername}>
+                    </div>
+                    <div class="usuarioESenha">
+                        <div>
+                            <p>Senha</p>
+                            <button on:click={()=>{atualizarSenha()}}><img src="pen.png" alt="atualizar senha"></button>
+                        </div>
+                        <input type="password" bind:value={senha} placeholder={senha}>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </main>
 
 <style>
-    main {
+    .usuarioESenha {
+        width: 50%;
+        background-color: #D9D9D9;
+        height: 120px;
+        padding: 10px;
+        
+    }
+    .usuarioESenha div{
+        display: flex;
+        justify-content: space-between;
+        
+    }
+    .usuarioESenha p{
+        font-family: "Outfit";
+        font-size: 18px;
+        font-weight: 600;
+    }
+    .usuarioESenha button{
+        background-color: transparent;
+        border: none;
+        cursor: pointer;
+    }
+    .usuarioESenha input{
+        background-color: transparent;
+        border: none;
+        font-family: "Outfit";
+        font-size: 16px;
+        width: 100%;
+        height: 60%;
+    }
+    .nomeProfessor {
+        display: flex;
+        align-items: center;
+        background-color: #D9D9D9;
+        height: 88px;
+        padding: 10px;
+        margin-top: 15px;
+        gap: 15px;
+    }
+    .nomeProfessor p{
+        font-family: "Outfit";
+        font-size: 26px;
+        font-weight: 600;
+    }
+    .content {
+        width: 80vw;
+        margin: auto;
+        padding-top: 10vh;
+    }
+    .content div{
+        border-radius: 20px;
+    }
+    main{
+        background-image:linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),  url('Iurifoto5 1.png');
+        height: 95vh;
+        background-size: cover;
+          background-position: center;
+    }
+    h1 {
+        font-family: "Playfair Display";
+        height: 42px;
+    }
+    h2 {
+        font-family: "Playfair Display";
+        height: 28px;
+    }
+    p {
+        font-family: "Outfit";
+        font-size: 16px;
+        margin-bottom: 10px;
+    }
+    .horizontal{
+        display: flex;
+        gap: 15px;
+        width: 100%;
+        margin-top: 15px;
+    }
+    .gridCointainer{
+        display: grid;
+        grid-template-columns: repeat(3,1fr);
+        gap: 20px;
+    }
+    .turma {
+        background-color: rgb(217, 217, 217);
+        margin-top: 10px;
+        padding: 10px;
+    }
+    #turmas {
+        padding: 10px;
+        background-color: white;
+    }
+    #feedback {
+        padding: 10px;
+        background-color: white;
+        width: 50%;
+        padding: 20px; /* Aumenta a área clicável do textarea */
+    }
+    #conta {
+        padding: 20px;
+        background-color: white;
+        width: 50%;
+    }
+    form {
+        margin-top: 10px;
         display: flex;
         flex-direction: column;
+        align-items: end;
+        gap: 5px;
     }
-
-    h1, h2 {
-        font-family: 'Times New Roman', Times, serif;
-    }
-
-    #turmas {
-        display: flex;
-        gap: 5%;
-    }
-
-    .turma {
-        background-color: #5A7302;
-        color: white;
-        width: 33%;
-        border-radius: 10px;
-        padding: 10px;
-    }
-
-    input {
+    .feedbackInput {
         width: 100%;
-        height: 100px;
+        height: 200px;
         padding: 10px;
-        font-size: 1em;
-        margin-bottom: 10px;
-        border-style: none;
-        background-color: #D9D9D9;
-        border-radius: 20px;
+        margin-top: 5px;
+        font-size: 16px; /* Define o tamanho da fonte */
+        border-radius: 20px; /* Bordas arredondadas */
+        background-color: #D9D9D9; /* Define a cor cinza */
+        resize: none; /* Impede que o usuário redimensione o textarea */
+        border: none;
     }
-
-    input::placeholder {
-       position: relative;
-       color: #505050;
-       bottom: 30px
-    }
-    
-    .success {
-        color: green;
-        margin-bottom: 10px;
-    }
-
-    .error {
-        color: red;
-        margin-bottom: 10px;
-    }
-
-    button {
-        padding: 10px 30px;
+    .feedbackButton {
+        background-color: #BC4749;
+        border: none;
+        width: 180px;
+        height: 35px;
+        border-radius: 15px;
+        font-family: "Outfit";
         color: white;
-        background-color: #0468BF;
-        border-style: none;
-        border-radius: 20px;
     }
 </style>
