@@ -55,7 +55,7 @@
                                     <p class="tipo">Para 60 alunos</p>
                                 {/if}
                             </div>
-                            <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                            <a href={`../sala/${sala.id}`}><i class="fa fa-chevron-right" aria-hidden="true"></i></a>
                         </div>
                     {/if}
                 {/each}
@@ -74,7 +74,7 @@
     }
 
     h1 {
-        font-family: "Display Fair";
+        font-family: "Playfair Display";
         font-weight: 400;
         color: black;
         padding: 10px;
