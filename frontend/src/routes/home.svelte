@@ -3,30 +3,19 @@
     import axios from 'axios';
 
     let pesquisa = ''
-    let cadeiras = []
     let salas = []
     let resultados = [] 
 
     onMount(async () => {
-        await fetchCadeiras();
         await fetchSalas();
     });
   
-    async function fetchCadeiras() {
-        try {
-            const response = await axios.get('http://localhost:5000/api/cadeiras');
-            cadeiras = response.data;
-            resultados = [...resultados, ...cadeiras];
-        } catch (error) {
-            console.error(error);
-        }
-    }
 
     async function fetchSalas() {
         try {
             const response = await axios.get(`http://localhost:5000/api/salas`);
             salas = response.data;
-            resultados = [...resultados, ...salas];
+            resultados = salas
         } catch (error) {
             console.error(error);
         }

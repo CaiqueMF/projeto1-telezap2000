@@ -23,7 +23,6 @@
 		addMode = 1;
 	}
   
-
   async function updateProfessor() {
       try {
         const updatedProfessor = {
@@ -32,7 +31,7 @@
         };
         console.log(updatedProfessor)
         await axios.put(`http://localhost:5000/api/professores/${editProfessorById}`, updatedProfessor);
-        goto('/professores');
+        editProfessorById = 0
       } catch (error) {
         console.error(error);
       }
@@ -130,7 +129,6 @@
 			{#if addMode == 1}
 				<tr class="addLine">
 					<td><input bind:value={nome} placeholder="Nome" required /></td>
-          <td><input bind:value={login} placeholder="Nome" required /></td>
 					<td>
 						<button on:click={addProfessor}><i class="fa-solid fa-check"></i></button>
 					</td>
@@ -168,7 +166,7 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		padding: 0 20%;
+		padding: 0 10%;
 		font-family: 'Outfit';
 		font-weight: 400;
 	}
@@ -213,11 +211,11 @@
   }
 
   .info input::placeholder {
-        position: relative;
-        top: 3%;
-       	padding-left: 96%;
-       	font-size: large;
-       	color: white;
+    position: relative;
+    top: 3%;
+    padding-left: 96%;
+    font-size: large;
+    color: white;
     }
 
   .info button {

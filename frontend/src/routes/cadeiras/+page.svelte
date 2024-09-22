@@ -254,7 +254,7 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		padding: 0 20%;
+		padding: 0 10%;
 		font-family: 'Outfit';
 		font-weight: 400;
 	}
