@@ -66,11 +66,14 @@
 
 <style>
     main {
-        height: 100%;
+        height: 100vh;
         width: 100%;
         display: flex;
         justify-content: center;
         align-items: center;
+        background-image:linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),  url('Iurifoto3.png');
+        background-size: cover;
+        background-position: center;
     }
 
     h1 {
@@ -91,7 +94,6 @@
         flex-direction: column;
         width: 90%;
         height: 80%;
-        margin-top: 5%;
         background-color: white;
     }
 

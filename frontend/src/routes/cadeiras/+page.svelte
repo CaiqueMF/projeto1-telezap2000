@@ -2,6 +2,8 @@
 	import { onMount } from 'svelte';
 	import axios from 'axios';
     import NavigationCoordenador from '../navigationCoordenador.svelte';
+	import { goto } from '$app/navigation';
+	import { token, user } from '../../store';
   
 	let cadeiras = [];
 	let nome = '';
@@ -19,7 +21,11 @@
   
 	onMount(async () => {
 		await fetchCadeiras();
-	});
+		const currentUser = $user;
+        if (!currentUser.isAuthenticated) {
+           goto('/');
+        }
+    });
 
 	function changeMode() {
 		addMode = 1;
@@ -257,6 +263,10 @@
 		padding: 0 10%;
 		font-family: 'Outfit';
 		font-weight: 400;
+		background-image:linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),  url('Iurifoto5 1.png');
+    height: 100vh;
+    background-size: cover;
+    background-position: center;
 	}
 
 	h1 {

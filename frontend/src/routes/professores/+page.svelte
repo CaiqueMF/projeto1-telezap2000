@@ -2,6 +2,8 @@
   import { onMount } from 'svelte';
   import axios from 'axios';
   import NavigationCoordenador from '../navigationCoordenador.svelte';
+  import { goto } from '$app/navigation';
+  import { token, user } from '../../store';
 
   let nome = '';
   let login = ''
@@ -17,6 +19,10 @@
     await fetchOptions();
     await fetchTurmas();
     associateDataWithProfessors();
+    const currentUser = $user;
+    if (!currentUser.isAuthenticated) {
+           goto('/');
+        }
   });
 
   function changeMode() {
@@ -32,6 +38,9 @@
         console.log(updatedProfessor)
         await axios.put(`http://localhost:5000/api/professores/${editProfessorById}`, updatedProfessor);
         editProfessorById = 0
+        await fetchOptions();
+         await fetchTurmas();
+         associateDataWithProfessors();
       } catch (error) {
         console.error(error);
       }
@@ -80,6 +89,9 @@
       console.error(error);
     }
     addMode = 0
+    await fetchOptions();
+    await fetchTurmas();
+    associateDataWithProfessors();
   }
 
   function associateDataWithProfessors() {
@@ -169,6 +181,10 @@
 		padding: 0 10%;
 		font-family: 'Outfit';
 		font-weight: 400;
+    background-image:linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),  url('Iurifoto5 1.png');
+    height: 100vh;
+    background-size: cover;
+    background-position: center;
 	}
 
   h1 {

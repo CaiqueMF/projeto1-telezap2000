@@ -2,6 +2,8 @@
   import { onMount } from 'svelte';
   import axios from 'axios';
   import NavigationCoordenador from '../navigationCoordenador.svelte';
+  import { goto } from '$app/navigation';
+  import { token, user } from '../../store';
 
   let id, dia, horario;
   let aulas_prolongadas = false
@@ -32,6 +34,10 @@
     await fetchOptions();
     await fetchTurmas();
     await fetchAlocacoes();
+    const currentUser = $user;
+    if (!currentUser.isAuthenticated) {
+           goto('/');
+        }
   });
 
   function changeMode() {
@@ -118,6 +124,7 @@
     } catch (error) {
       console.error('Erro ao adicionar turma:', error);
     }
+    fetchAlocacoes();
   }
 
   async function addAlocacao(id) {
@@ -156,6 +163,7 @@
       editSalaById = null
       fetchTurmas()
       fetchOptions()
+      fetchAlocacoes();
     }
 
     async function updateMode(turma_id) {
@@ -178,10 +186,10 @@
     async function deleteTurma(turma_id) {
       try {
         await axios.delete(`http://localhost:5000/api/turmas/${turma_id}`)
-        goto('/turmas');
       } catch (error) {
         console.error(error);
       }
+      fetchTurmas()
     }
 
     async function deleteAlocacao(id_alocacao) {
@@ -401,6 +409,10 @@
 		font-family: 'Outfit';
 		font-weight: 400;
     font-size: 16px;
+    background-image:linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),  url('Iurifoto5 1.png');
+    height: 100vh;
+    background-size: cover;
+    background-position: center;
 	}
 
   ul {
@@ -420,11 +432,8 @@
   .square {
     border-radius: 20px;
     display: flex;
-    justify-content: center;
-    align-items: center;
     flex-direction: column;
     width: 100%;
-    height: 80%;
     margin-top: 3%;
     background-color: white;
     padding: 10px;

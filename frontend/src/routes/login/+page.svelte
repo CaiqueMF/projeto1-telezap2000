@@ -69,7 +69,10 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        height: 90vh;
+        background-image:linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),  url('Iurifoto5 1.png');
+        height: 95vh;
+        background-size: cover;
+        background-position: center;
         text-align: center;
     }
   
@@ -79,7 +82,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        background-color: #5A7302;
+        background-color: #244E2C;
         color: black;
         border-radius: 20px;
         position: relative;
