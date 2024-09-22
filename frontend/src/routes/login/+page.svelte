@@ -23,7 +23,8 @@
           isAuthenticated: true,
           username: username,
           role: data.role,
-          id_professor: data.id_professor
+          id_professor: data.id_professor,
+          nome : data.nome
         });
         if (data.role == 'admin'){
             goto('/cadeiras');

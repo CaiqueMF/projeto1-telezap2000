@@ -397,9 +397,9 @@ def handle_alocacao(id):
 def add_feedback():
     data = request.get_json()
     novo_feedback = Feedback(
-    id_professor=data['id_professor'],
+    id_professor=data['currentUser'],
     feedback=data['feedback'],
-)
+    )
     db.session.add(novo_feedback)
     db.session.commit()
     return jsonify({'message': 'Feedback adicionada com sucesso!'}), 201
@@ -426,7 +426,38 @@ def login():
         return jsonify({"msg": "Bad username or password"}), 401
 
     access_token = create_access_token(identity={"username": username, "role": user.role})
-    return jsonify(access_token=access_token, role = user.role)
+    return jsonify(access_token=access_token, role = user.role, id_professor = user.id_professor,nome = user.nome)
+
+@main.route('/api/update_login', methods=['PUT'])
+def update_login():
+    data = request.get_json()
+    new_login = data.get('login_novo')
+    old_login = data.get('login_antigo')
+    print(old_login)
+    logins = Login.query.all()
+    for login in logins:
+        print(login.login)
+    user = Login.query.filter_by(login=old_login).first()
+    if not user:
+        return jsonify({'message': 'User not found'}), 404
+
+    user.login = new_login
+    db.session.commit()
+    return jsonify({'message': 'Login updated successfully'}), 200
+
+@main.route('/api/update_password', methods=['PUT'])
+def update_password():
+    data = request.get_json()
+    new_password = data.get('senha')
+    old_login = data.get('login')
+    user = Login.query.filter_by(login=old_login).first()
+
+    if not user:
+        return jsonify({'message': 'User not found'}), 404
+
+    user.senha = new_password
+    db.session.commit()
+    return jsonify({'message': 'Password updated successfully'}), 200
 
 @main.route('/api/protected', methods=['GET'])
 @jwt_required()

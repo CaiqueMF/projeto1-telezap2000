@@ -8,5 +8,6 @@ export const user = writable({
   isAuthenticated: false,
   username: null,
   role: null,
-  id_professor: null
+  id_professor: null,
+  nome: null
 });
