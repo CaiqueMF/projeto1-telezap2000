@@ -1,6 +1,7 @@
 <script>
     import { onMount } from 'svelte';
     import axios from 'axios';
+    import { goto } from '$app/navigation';
 	import { token, user } from '../../store';
 
 	$: currentUser = $user.id_professor;
@@ -30,6 +31,10 @@
         await fetchOptions();
         await fetchTurmas();
         await fetchAlocacoes();
+        const currentUser = $user;
+        if (!currentUser.isAuthenticated) {
+           goto('/');
+        }
     });
 
     async function fetchOptions() {
@@ -263,7 +268,7 @@
         background-image:linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),  url('Iurifoto5 1.png');
         height: 95vh;
         background-size: cover;
-          background-position: center;
+        background-position: center;
     }
     h1 {
         font-family: "Playfair Display";

@@ -10,7 +10,11 @@
 	<nav>
 		<ul>
 			<li>
-				<p>Fada</p>
+				{#if $page.url.pathname === '/salas'}
+					<img src="../Logo Fada.png" alt="Fada">
+				{:else}
+				<img src="/Logo Fada.png" alt="Fada">
+				{/if}
 			</li>
 			<li aria-current={$page.url.pathname === '/' ? 'page' : undefined} class="home">
 				<a href="/">Home</a>
@@ -65,15 +69,8 @@ li {
 	height: 100%;
 }
 
-ul li p {
-	color: white;
-	font-family: "Moon Dance", cursive;
-	font-size: 2rem;
-	font-weight: 400;
-}
-
-li[aria-current='page'] a {
-	font-weight: 600;
+img {
+	width: 75px;
 }
 
 nav a {

@@ -1,1 +1,1 @@
-export { default as component } from "../../../../src/routes/editTurma/[id]/+page.svelte";
+export { default as component } from "../../../../src/routes/planilha/+page.svelte";
