@@ -89,7 +89,7 @@
         padding: 15px;
         border-radius: 20px;
         display: flex;
-        justify-content: center;
+        justify-content: space-around;
         align-items: center;
         flex-direction: column;
         width: 90%;
